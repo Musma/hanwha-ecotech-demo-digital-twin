@@ -160,7 +160,7 @@ const BLOCK_INFO_ROWS: BlockInfoRow[] = [
   gap: 10px;
   align-items: center;
   justify-content: center;
-  width: 80px;
+  min-width: 80px;
   height: 30px;
   padding: 10px;
   font-family: 'Noto Sans KR', sans-serif;
@@ -168,6 +168,7 @@ const BLOCK_INFO_ROWS: BlockInfoRow[] = [
   font-weight: 500;
   line-height: 16.5px;
   color: #ffffff;
+  white-space: nowrap;
   cursor: pointer;
   background: #555555;
   border: 1px solid #777777;
