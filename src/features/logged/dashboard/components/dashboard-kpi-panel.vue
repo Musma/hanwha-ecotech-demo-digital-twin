@@ -1,7 +1,15 @@
 <script setup lang="ts">
+import { ref } from 'vue'
+
 const emit = defineEmits<{
   'production-click': []
 }>()
+
+const isCollapsed = ref(false)
+
+const toggleCollapsed = () => {
+  isCollapsed.value = !isCollapsed.value
+}
 
 interface AxisMonth {
   label: string
@@ -74,7 +82,7 @@ const LTIR_ROWS = ['전년 동기 대비', '전년 동기 대비', '전년 동�
 <template>
   <div class="dashboard-kpi-panel">
     <div class="kpi-panel">
-      <div class="kpi-glass">
+      <div v-show="!isCollapsed" class="kpi-glass">
         <div class="kpi-grid">
           <div
             class="glass-card card-achievement"
@@ -371,14 +379,21 @@ const LTIR_ROWS = ['전년 동기 대비', '전년 동기 대비', '전년 동�
           </div>
         </div>
       </div>
-      <div class="dashboard-button">
+      <button
+        class="dashboard-button"
+        type="button"
+        :aria-expanded="!isCollapsed"
+        aria-label="현황판 접기/펼치기"
+        @click="toggleCollapsed"
+      >
         <img
           class="dashboard-button-icon"
+          :class="{ 'dashboard-button-icon--collapsed': isCollapsed }"
           src="@/assets/images/screen-16/icon0.svg"
           alt=""
         />
         <div class="dashboard-button-label">Dashboard</div>
-      </div>
+      </button>
     </div>
   </div>
 </template>
@@ -1089,6 +1104,11 @@ const LTIR_ROWS = ['전년 동기 대비', '전년 동기 대비', '전년 동�
   width: 14px;
   height: 14px;
   overflow: visible;
+  transition: rotate 0.2s ease;
+}
+
+.dashboard-button-icon--collapsed {
+  rotate: 180deg;
 }
 
 .dashboard-button-label {

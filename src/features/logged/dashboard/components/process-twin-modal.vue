@@ -1,4 +1,6 @@
 <script setup lang="ts">
+const PROCESS_TWIN_APP_URL = 'https://musma.github.io/hanwha-sf-pos-demo/'
+
 const emit = defineEmits<{
   close: []
 }>()
@@ -18,12 +20,11 @@ const emit = defineEmits<{
           />
         </button>
       </div>
-      <img
-        class="modal-image"
-        src="@/assets/images/screen-17/flow-chart1.png"
-        alt=""
+      <iframe
+        class="modal-app-view"
+        :src="PROCESS_TWIN_APP_URL"
+        title="공정 Twin"
       />
-      <div class="modal-footer-spacer" />
     </div>
   </div>
 </template>
@@ -111,19 +112,12 @@ const emit = defineEmits<{
   overflow: visible;
 }
 
-.modal-image {
+.modal-app-view {
   position: relative;
-  flex-shrink: 0;
-  width: 288px;
-  height: 288px;
-  aspect-ratio: 1;
-  object-fit: cover;
-}
-
-.modal-footer-spacer {
-  position: relative;
-  flex-shrink: 0;
-  width: 100px;
-  height: 16px;
+  flex: 1;
+  align-self: stretch;
+  border: none;
+  border-radius: 0 0 10px 10px;
+  background: #ffffff;
 }
 </style>

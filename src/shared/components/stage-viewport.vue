@@ -3,13 +3,12 @@ import { onBeforeUnmount, onMounted, ref } from 'vue'
 
 import { STAGE_HEIGHT, STAGE_WIDTH } from '@/shared/constants/stage'
 
-const scale = ref(1)
+const scaleX = ref(1)
+const scaleY = ref(1)
 
 const updateScale = () => {
-  scale.value = Math.min(
-    window.innerWidth / STAGE_WIDTH,
-    window.innerHeight / STAGE_HEIGHT,
-  )
+  scaleX.value = window.innerWidth / STAGE_WIDTH
+  scaleY.value = window.innerHeight / STAGE_HEIGHT
 }
 
 onMounted(() => {
@@ -26,7 +25,7 @@ onBeforeUnmount(() => {
   <div class="stage-viewport">
     <div
       class="stage-viewport__stage"
-      :style="{ transform: `scale(${scale})` }"
+      :style="{ transform: `scale(${scaleX}, ${scaleY})` }"
     >
       <slot />
     </div>
@@ -35,9 +34,6 @@ onBeforeUnmount(() => {
 
 <style scoped lang="scss">
 .stage-viewport {
-  display: flex;
-  align-items: center;
-  justify-content: center;
   width: 100vw;
   height: 100vh;
   overflow: clip;
@@ -46,10 +42,9 @@ onBeforeUnmount(() => {
 
 .stage-viewport__stage {
   position: relative;
-  flex: none;
   width: 1920px;
   height: 1140px;
   overflow: clip;
-  transform-origin: center center;
+  transform-origin: left top;
 }
 </style>
