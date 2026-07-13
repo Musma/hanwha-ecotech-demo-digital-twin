@@ -82,298 +82,325 @@ const LTIR_ROWS = ['전년 동기 대비', '전년 동기 대비', '전년 동�
 <template>
   <div class="dashboard-kpi-panel">
     <div class="kpi-panel">
-      <div v-show="!isCollapsed" class="kpi-glass">
-        <div class="kpi-grid">
-          <div
-            class="glass-card card-achievement"
-            role="button"
-            tabindex="0"
-            @click="emit('production-click')"
-            @keydown.enter="emit('production-click')"
-          >
-            <div class="card-topline card-topline--orange" />
-            <div class="card-title">생산량 달성률 · Achievement</div>
-            <div class="card-headline">
-              <div class="goal-pill goal-pill--orange-strong">
-                <div class="goal-text goal-text--orange">목표: 100%</div>
+      <div
+        class="kpi-collapse"
+        :class="{ 'kpi-collapse--collapsed': isCollapsed }"
+      >
+        <div class="kpi-collapse-inner">
+          <div class="kpi-glass">
+            <div class="kpi-grid">
+              <div
+                class="glass-card card-achievement"
+                role="button"
+                tabindex="0"
+                @click="emit('production-click')"
+                @keydown.enter="emit('production-click')"
+              >
+                <div class="card-topline card-topline--orange" />
+                <div class="card-title">생산량 달성률 · Achievement</div>
+                <div class="card-headline">
+                  <div class="goal-pill goal-pill--orange-strong">
+                    <div class="goal-text goal-text--orange">목표: 100%</div>
+                  </div>
+                  <div class="big-value">
+                    <div class="big-value-number big-value-number--orange">
+                      92
+                    </div>
+                    <div class="big-value-unit">%</div>
+                  </div>
+                </div>
+                <div class="bar-chart-area">
+                  <div class="axis-column axis-column--short">
+                    <div class="axis-label">10k</div>
+                    <div class="axis-label">5k</div>
+                    <div class="axis-label">0k</div>
+                  </div>
+                  <div class="bar-chart-body">
+                    <img
+                      class="bar-chart-image"
+                      src="@/assets/images/screen-2/frame-11712770130.svg"
+                      alt=""
+                    />
+                    <div class="month-axis">
+                      <div
+                        v-for="month in ACHIEVEMENT_MONTHS"
+                        :key="month.label"
+                        class="month-slot"
+                        :style="{ width: `${month.slotWidth}px` }"
+                      >
+                        <div
+                          class="month-label"
+                          :style="{ left: month.left, width: month.width }"
+                        >
+                          {{ month.label }}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
-              <div class="big-value">
-                <div class="big-value-number big-value-number--orange">92</div>
-                <div class="big-value-unit">%</div>
+
+              <div class="glass-card card-adherence">
+                <div class="card-topline card-topline--orange" />
+                <div class="card-title">계획 적중률 · Adherence</div>
+                <div class="card-headline">
+                  <div class="goal-pill goal-pill--orange">
+                    <div class="goal-text goal-text--orange">
+                      목표: 85% ~ 95%
+                    </div>
+                  </div>
+                  <div class="big-value">
+                    <div class="big-value-number big-value-number--orange">
+                      88
+                    </div>
+                    <div class="big-value-unit">%</div>
+                  </div>
+                </div>
+                <div class="stat-row">
+                  <div class="stat-box">
+                    <div class="stat-label">전월</div>
+                    <div class="stat-value stat-value--orange">86%</div>
+                  </div>
+                  <div class="stat-box">
+                    <div class="stat-label">누계</div>
+                    <div class="stat-value stat-value--orange">85.9%</div>
+                  </div>
+                </div>
+                <div class="stat-row">
+                  <div class="stat-box">
+                    <div class="stat-label">최종</div>
+                    <div class="stat-value stat-value--orange">88%</div>
+                  </div>
+                </div>
               </div>
-            </div>
-            <div class="bar-chart-area">
-              <div class="axis-column axis-column--short">
-                <div class="axis-label">10k</div>
-                <div class="axis-label">5k</div>
-                <div class="axis-label">0k</div>
-              </div>
-              <div class="bar-chart-body">
-                <img
-                  class="bar-chart-image"
-                  src="@/assets/images/screen-2/frame-11712770130.svg"
-                  alt=""
+
+              <div class="glass-card card-delivery">
+                <div
+                  class="card-topline card-topline--blue card-topline--wide"
                 />
-                <div class="month-axis">
-                  <div
-                    v-for="month in ACHIEVEMENT_MONTHS"
-                    :key="month.label"
-                    class="month-slot"
-                    :style="{ width: `${month.slotWidth}px` }"
-                  >
+                <div class="card-title">적기 입고율 · On-Time Delivery</div>
+                <div class="card-headline">
+                  <div class="goal-pill goal-pill--blue">
+                    <div class="goal-text goal-text--blue">목표: 98% 이상</div>
+                  </div>
+                  <div class="big-value">
+                    <div class="big-value-number big-value-number--blue">
+                      97.5
+                    </div>
+                    <div class="big-value-unit">%</div>
+                  </div>
+                </div>
+                <div class="delivery-chart-area">
+                  <div class="delivery-chart">
+                    <img
+                      class="delivery-chart-grid"
+                      src="@/assets/images/screen-2/group10.svg"
+                      alt=""
+                    />
                     <div
-                      class="month-label"
+                      v-for="month in DELIVERY_MONTHS"
+                      :key="month.label"
+                      class="delivery-month-label"
                       :style="{ left: month.left, width: month.width }"
                     >
                       {{ month.label }}
                     </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="glass-card card-adherence">
-            <div class="card-topline card-topline--orange" />
-            <div class="card-title">계획 적중률 · Adherence</div>
-            <div class="card-headline">
-              <div class="goal-pill goal-pill--orange">
-                <div class="goal-text goal-text--orange">목표: 85% ~ 95%</div>
-              </div>
-              <div class="big-value">
-                <div class="big-value-number big-value-number--orange">88</div>
-                <div class="big-value-unit">%</div>
-              </div>
-            </div>
-            <div class="stat-row">
-              <div class="stat-box">
-                <div class="stat-label">전월</div>
-                <div class="stat-value stat-value--orange">86%</div>
-              </div>
-              <div class="stat-box">
-                <div class="stat-label">누계</div>
-                <div class="stat-value stat-value--orange">85.9%</div>
-              </div>
-            </div>
-            <div class="stat-row">
-              <div class="stat-box">
-                <div class="stat-label">최종</div>
-                <div class="stat-value stat-value--orange">88%</div>
-              </div>
-            </div>
-          </div>
-
-          <div class="glass-card card-delivery">
-            <div class="card-topline card-topline--blue card-topline--wide" />
-            <div class="card-title">적기 입고율 · On-Time Delivery</div>
-            <div class="card-headline">
-              <div class="goal-pill goal-pill--blue">
-                <div class="goal-text goal-text--blue">목표: 98% 이상</div>
-              </div>
-              <div class="big-value">
-                <div class="big-value-number big-value-number--blue">97.5</div>
-                <div class="big-value-unit">%</div>
-              </div>
-            </div>
-            <div class="delivery-chart-area">
-              <div class="delivery-chart">
-                <img
-                  class="delivery-chart-grid"
-                  src="@/assets/images/screen-2/group10.svg"
-                  alt=""
-                />
-                <div
-                  v-for="month in DELIVERY_MONTHS"
-                  :key="month.label"
-                  class="delivery-month-label"
-                  :style="{ left: month.left, width: month.width }"
-                >
-                  {{ month.label }}
-                </div>
-                <div class="delivery-axis">
-                  <div class="axis-label axis-label--stretch">100%</div>
-                  <div class="axis-label axis-label--stretch">97%</div>
-                  <div class="axis-label axis-label--stretch">95%</div>
-                </div>
-                <img
-                  class="delivery-goal-line"
-                  src="@/assets/images/screen-2/group19.svg"
-                  alt=""
-                />
-                <img
-                  class="delivery-line delivery-line--pnd"
-                  src="@/assets/images/screen-2/group20.svg"
-                  alt=""
-                />
-                <img
-                  class="delivery-line delivery-line--mnd"
-                  src="@/assets/images/screen-2/group21.svg"
-                  alt=""
-                />
-              </div>
-              <div class="delivery-stats">
-                <div
-                  v-for="(row, rowIndex) in DELIVERY_STATS"
-                  :key="rowIndex"
-                  class="delivery-stat-row"
-                >
-                  <div
-                    v-for="stat in row"
-                    :key="stat.label"
-                    class="stat-box stat-box--fixed"
-                  >
-                    <div class="stat-label">{{ stat.label }}</div>
-                    <div class="stat-value stat-value--blue">
-                      {{ stat.value }}
+                    <div class="delivery-axis">
+                      <div class="axis-label axis-label--stretch">100%</div>
+                      <div class="axis-label axis-label--stretch">97%</div>
+                      <div class="axis-label axis-label--stretch">95%</div>
                     </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="glass-card card-load">
-            <div class="card-topline card-topline--blue" />
-            <div class="card-title">부하 평준화율 · Load Balance</div>
-            <div class="card-headline">
-              <div class="goal-pill goal-pill--blue">
-                <div class="goal-text goal-text--blue">목표: 77% 이상</div>
-              </div>
-              <div class="big-value">
-                <div class="big-value-number big-value-number--blue">81</div>
-                <div class="big-value-unit">%</div>
-              </div>
-            </div>
-            <div class="bar-chart-area">
-              <div class="axis-column">
-                <div class="axis-label">100</div>
-                <div class="axis-label">75</div>
-                <div class="axis-label">50</div>
-                <div class="axis-label">25</div>
-                <div class="axis-label">0</div>
-              </div>
-              <div class="bar-chart-body">
-                <img
-                  class="bar-chart-image"
-                  src="@/assets/images/screen-2/frame-11712770131.svg"
-                  alt=""
-                />
-                <div class="month-axis month-axis--padded">
-                  <div
-                    v-for="line in LOAD_LINES"
-                    :key="line.label"
-                    class="month-slot"
-                    :style="{ width: `${line.slotWidth}px` }"
-                  >
-                    <div
-                      class="month-label"
-                      :style="{ left: line.left, width: line.width }"
-                    >
-                      {{ line.label }}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="glass-card card-material">
-            <div class="card-topline card-topline--blue" />
-            <div class="card-title">자재 준비율 · Material Prep</div>
-            <div class="card-headline">
-              <div class="goal-pill goal-pill--blue">
-                <div class="goal-text goal-text--blue">목표: 85% ~ 95%</div>
-              </div>
-              <div class="big-value">
-                <div class="big-value-number big-value-number--blue">88</div>
-                <div class="big-value-unit">%</div>
-              </div>
-            </div>
-            <div class="material-rows">
-              <div
-                v-for="row in MATERIAL_ROWS"
-                :key="row.label"
-                class="material-row"
-              >
-                <div class="material-row-head">
-                  <div class="material-label">{{ row.label }}</div>
-                  <div class="material-value" :style="{ color: row.color }">
-                    {{ row.value }}
-                  </div>
-                </div>
-                <div class="material-track-margin">
-                  <div class="material-track">
-                    <div
-                      class="material-fill"
-                      :style="{
-                        width: `${row.width}px`,
-                        background: row.color,
-                        boxShadow: `0px 2px 6px 0px rgba(0, 0, 0, 0.4), 0px 0px 5px 0px ${row.color}`,
-                      }"
+                    <img
+                      class="delivery-goal-line"
+                      src="@/assets/images/screen-2/group19.svg"
+                      alt=""
+                    />
+                    <img
+                      class="delivery-line delivery-line--pnd"
+                      src="@/assets/images/screen-2/group20.svg"
+                      alt=""
+                    />
+                    <img
+                      class="delivery-line delivery-line--mnd"
+                      src="@/assets/images/screen-2/group21.svg"
+                      alt=""
                     />
                   </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="glass-card card-safety">
-            <div class="card-topline card-topline--green" />
-            <div class="card-title">Serious Injuries · 중대재해</div>
-            <div class="card-headline">
-              <div class="goal-pill goal-pill--green goal-pill--w65">
-                <div class="goal-text goal-text--green">목표: Zero</div>
-              </div>
-              <div class="big-value">
-                <div class="big-value-number big-value-number--green">0</div>
-                <div class="big-value-unit">건</div>
-              </div>
-            </div>
-            <div class="safety-stats">
-              <div
-                v-for="stat in SAFETY_STATS"
-                :key="stat.label"
-                class="safety-stat-box"
-              >
-                <div class="safety-stat-line">
-                  <div class="stat-label">{{ stat.label }}</div>
-                </div>
-                <div class="safety-stat-line">
-                  <div class="safety-stat-value">
-                    <span>
-                      <span class="safety-stat-number">{{ stat.value }}</span>
-                      <span class="safety-stat-unit">{{ stat.unit }}</span>
-                    </span>
+                  <div class="delivery-stats">
+                    <div
+                      v-for="(row, rowIndex) in DELIVERY_STATS"
+                      :key="rowIndex"
+                      class="delivery-stat-row"
+                    >
+                      <div
+                        v-for="stat in row"
+                        :key="stat.label"
+                        class="stat-box stat-box--fixed"
+                      >
+                        <div class="stat-label">{{ stat.label }}</div>
+                        <div class="stat-value stat-value--blue">
+                          {{ stat.value }}
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-          </div>
 
-          <div class="glass-card card-ltir">
-            <div class="card-topline card-topline--green" />
-            <div class="card-title">LTIR · 근로손실 재해율</div>
-            <div class="card-headline">
-              <div class="goal-pill goal-pill--green goal-pill--w104">
-                <div class="goal-text goal-text--green">목표: 0.050% 이하</div>
-              </div>
-              <div class="big-value">
-                <div class="big-value-number big-value-number--green">
-                  0.048
+              <div class="glass-card card-load">
+                <div class="card-topline card-topline--blue" />
+                <div class="card-title">부하 평준화율 · Load Balance</div>
+                <div class="card-headline">
+                  <div class="goal-pill goal-pill--blue">
+                    <div class="goal-text goal-text--blue">목표: 77% 이상</div>
+                  </div>
+                  <div class="big-value">
+                    <div class="big-value-number big-value-number--blue">
+                      81
+                    </div>
+                    <div class="big-value-unit">%</div>
+                  </div>
                 </div>
-                <div class="big-value-unit">건</div>
+                <div class="bar-chart-area">
+                  <div class="axis-column">
+                    <div class="axis-label">100</div>
+                    <div class="axis-label">75</div>
+                    <div class="axis-label">50</div>
+                    <div class="axis-label">25</div>
+                    <div class="axis-label">0</div>
+                  </div>
+                  <div class="bar-chart-body">
+                    <img
+                      class="bar-chart-image"
+                      src="@/assets/images/screen-2/frame-11712770131.svg"
+                      alt=""
+                    />
+                    <div class="month-axis month-axis--padded">
+                      <div
+                        v-for="line in LOAD_LINES"
+                        :key="line.label"
+                        class="month-slot"
+                        :style="{ width: `${line.slotWidth}px` }"
+                      >
+                        <div
+                          class="month-label"
+                          :style="{ left: line.left, width: line.width }"
+                        >
+                          {{ line.label }}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
-            </div>
-            <div
-              v-for="(row, rowIndex) in LTIR_ROWS"
-              :key="rowIndex"
-              class="ltir-row"
-            >
-              <div class="ltir-cell">
-                <div class="stat-label">{{ row }}</div>
+
+              <div class="glass-card card-material">
+                <div class="card-topline card-topline--blue" />
+                <div class="card-title">자재 준비율 · Material Prep</div>
+                <div class="card-headline">
+                  <div class="goal-pill goal-pill--blue">
+                    <div class="goal-text goal-text--blue">목표: 85% ~ 95%</div>
+                  </div>
+                  <div class="big-value">
+                    <div class="big-value-number big-value-number--blue">
+                      88
+                    </div>
+                    <div class="big-value-unit">%</div>
+                  </div>
+                </div>
+                <div class="material-rows">
+                  <div
+                    v-for="row in MATERIAL_ROWS"
+                    :key="row.label"
+                    class="material-row"
+                  >
+                    <div class="material-row-head">
+                      <div class="material-label">{{ row.label }}</div>
+                      <div class="material-value" :style="{ color: row.color }">
+                        {{ row.value }}
+                      </div>
+                    </div>
+                    <div class="material-track-margin">
+                      <div class="material-track">
+                        <div
+                          class="material-fill"
+                          :style="{
+                            width: `${row.width}px`,
+                            background: row.color,
+                            boxShadow: `0px 2px 6px 0px rgba(0, 0, 0, 0.4), 0px 0px 5px 0px ${row.color}`,
+                          }"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
-              <div class="ltir-cell">
-                <div class="ltir-delta">▼ 22.6%</div>
+
+              <div class="glass-card card-safety">
+                <div class="card-topline card-topline--green" />
+                <div class="card-title">Serious Injuries · 중대재해</div>
+                <div class="card-headline">
+                  <div class="goal-pill goal-pill--green goal-pill--w65">
+                    <div class="goal-text goal-text--green">목표: Zero</div>
+                  </div>
+                  <div class="big-value">
+                    <div class="big-value-number big-value-number--green">
+                      0
+                    </div>
+                    <div class="big-value-unit">건</div>
+                  </div>
+                </div>
+                <div class="safety-stats">
+                  <div
+                    v-for="stat in SAFETY_STATS"
+                    :key="stat.label"
+                    class="safety-stat-box"
+                  >
+                    <div class="safety-stat-line">
+                      <div class="stat-label">{{ stat.label }}</div>
+                    </div>
+                    <div class="safety-stat-line">
+                      <div class="safety-stat-value">
+                        <span>
+                          <span class="safety-stat-number">{{
+                            stat.value
+                          }}</span>
+                          <span class="safety-stat-unit">{{ stat.unit }}</span>
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="glass-card card-ltir">
+                <div class="card-topline card-topline--green" />
+                <div class="card-title">LTIR · 근로손실 재해율</div>
+                <div class="card-headline">
+                  <div class="goal-pill goal-pill--green goal-pill--w104">
+                    <div class="goal-text goal-text--green">
+                      목표: 0.050% 이하
+                    </div>
+                  </div>
+                  <div class="big-value">
+                    <div class="big-value-number big-value-number--green">
+                      0.048
+                    </div>
+                    <div class="big-value-unit">건</div>
+                  </div>
+                </div>
+                <div
+                  v-for="(row, rowIndex) in LTIR_ROWS"
+                  :key="rowIndex"
+                  class="ltir-row"
+                >
+                  <div class="ltir-cell">
+                    <div class="stat-label">{{ row }}</div>
+                  </div>
+                  <div class="ltir-cell">
+                    <div class="ltir-delta">▼ 22.6%</div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -422,6 +449,24 @@ const LTIR_ROWS = ['전년 동기 대비', '전년 동기 대비', '전년 동�
   translate: -50%;
 }
 
+/* 아코디언: grid-template-rows 0fr/1fr 전환으로 높이를 부드럽게 접는다 */
+.kpi-collapse {
+  display: grid;
+  flex-shrink: 0;
+  grid-template-rows: 1fr;
+  width: 1170px;
+  transition: grid-template-rows 0.35s ease;
+}
+
+.kpi-collapse--collapsed {
+  grid-template-rows: 0fr;
+}
+
+.kpi-collapse-inner {
+  min-height: 0;
+  overflow: clip;
+}
+
 .kpi-glass {
   position: relative;
   display: flex;
@@ -436,6 +481,12 @@ const LTIR_ROWS = ['전년 동기 대비', '전년 동기 대비', '전년 동�
   background: rgba(30, 30, 30, 0.8);
   backdrop-filter: blur(5px);
   border-radius: 0 0 10px 10px;
+  opacity: 1;
+  transition: opacity 0.3s ease;
+}
+
+.kpi-collapse--collapsed .kpi-glass {
+  opacity: 0;
 }
 
 .kpi-grid {
