@@ -5,8 +5,12 @@
         <div class="minimap-title">미니맵</div>
       </div>
       <div class="minimap-body">
-        <!-- 원본 export의 mask-group0.svg가 0바이트 빈 파일이라 이미지는 생략한다 -->
-        <div class="minimap-image-placeholder" />
+        <!-- 원본 export의 mask-group0.svg가 0바이트 빈 파일이라 씬 항공뷰 썸네일로 대체한다 -->
+        <img
+          class="minimap-image"
+          src="@/assets/images/screen-16/minimap-map.png"
+          alt="야드 미니맵"
+        />
       </div>
       <div class="minimap-toolbar">
         <div class="minimap-toolbar-spacer" />
@@ -106,10 +110,11 @@
   height: 100px;
 }
 
-.minimap-image-placeholder {
+.minimap-image {
   flex-shrink: 0;
   width: 298px;
   height: 100px;
+  object-fit: cover;
 }
 
 .minimap-toolbar {
