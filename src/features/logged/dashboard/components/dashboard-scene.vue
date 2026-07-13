@@ -303,10 +303,13 @@ const CCTV_ZONES: CctvZone[] = [
   left: 4%;
   width: 91.62%;
   height: 100%;
-  padding: 1.32px;
-  border: 1.32px solid var(--zone-color);
+  border: 3px solid var(--zone-color);
   border-radius: 44341468px;
   opacity: 0.35;
+  box-shadow:
+    0 0 10px var(--zone-color),
+    inset 0 0 6px var(--zone-color-soft);
+  animation: zone-pulse 2s ease-out infinite;
 }
 
 .zone-ring-inner {
@@ -317,10 +320,44 @@ const CCTV_ZONES: CctvZone[] = [
   left: 20%;
   width: 59.63%;
   height: 65.08%;
-  padding: 0.86px;
-  border: 0.86px solid var(--zone-color);
+  border: 2px solid var(--zone-color);
   border-radius: 28858998px;
   opacity: 0.69;
+  box-shadow: 0 0 8px var(--zone-color);
+  animation: zone-pulse 2s ease-out infinite 0.5s;
+}
+
+/* 위험(주황) 존은 훨씬 빠른 파동으로 경고 신호를 준다 */
+.zone-marker--red .zone-ring-outer {
+  border-width: 4px;
+  box-shadow:
+    0 0 14px var(--zone-color-glow),
+    inset 0 0 8px var(--zone-color-soft);
+  animation-duration: 0.8s;
+}
+
+.zone-marker--red .zone-ring-inner {
+  border-width: 3px;
+  box-shadow: 0 0 12px var(--zone-color-glow);
+  animation-duration: 0.8s;
+  animation-delay: 0.2s;
+}
+
+@keyframes zone-pulse {
+  0% {
+    opacity: 1;
+    transform: scale(0.5);
+  }
+
+  60% {
+    opacity: 0.5;
+    transform: scale(1.05);
+  }
+
+  100% {
+    opacity: 0;
+    transform: scale(1.35);
+  }
 }
 
 .zone-button {
