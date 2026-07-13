@@ -15,8 +15,8 @@ const ALARM_FIELDS: AlarmField[] = [
     value: 'Block 502 · Dock 3 North',
     valueClass: 'value-location',
   },
-  { label: '알람 유형', value: '용접 검사 미완료', valueClass: 'value-type' },
-  { label: '발생 시각', value: '14:37:22 KST', valueClass: 'value-time' },
+  { label: '알람 유형', value: '화재 발생', valueClass: 'value-type' },
+  { label: '발생 시각', value: '26년 7월 14일 14:04', valueClass: 'value-time' },
   {
     label: '위험 등급',
     value: 'CRITICAL — Level 4',
