@@ -4,6 +4,10 @@ const emit = defineEmits<{
   'record-click': []
   'alarm-click': []
 }>()
+
+const openWeather = () => {
+  window.open('https://weather.naver.com/', 'naver-weather', 'width=1200,height=900')
+}
 </script>
 
 <template>
@@ -31,13 +35,18 @@ const emit = defineEmits<{
         />
       </div>
       <div class="header-right">
-        <div class="weather-button">
+        <button
+          class="weather-button"
+          type="button"
+          aria-label="날씨 보기"
+          @click="openWeather"
+        >
           <img
             class="weather-icon"
             src="@/assets/images/screen-16/group-2150.svg"
             alt=""
           />
-        </div>
+        </button>
         <button
           class="icon-button"
           type="button"
@@ -205,6 +214,7 @@ button.icon-button {
   flex-shrink: 0;
   width: 50px;
   height: 50px;
+  cursor: pointer;
 }
 
 .weather-icon {
