@@ -12,6 +12,7 @@ import DashboardStatusBar from '@/features/logged/dashboard/components/dashboard
 import DashboardTwinTabs from '@/features/logged/dashboard/components/dashboard-twin-tabs.vue'
 import EquipmentTwinModal from '@/features/logged/dashboard/components/equipment-twin-modal.vue'
 import HseTwinModal from '@/features/logged/dashboard/components/hse-twin-modal.vue'
+import LlmChatSidebar from '@/features/logged/dashboard/components/llm-chat-sidebar.vue'
 import LogisticsTwinModal from '@/features/logged/dashboard/components/logistics-twin-modal.vue'
 import ProcessTwinModal from '@/features/logged/dashboard/components/process-twin-modal.vue'
 import ProductionAchievementModal from '@/features/logged/dashboard/components/production-achievement-modal.vue'
@@ -25,10 +26,13 @@ const {
   activeTwinTabId,
   toggleTwinModal,
   isSideNavOpen,
+  isLlmChatOpen,
   detailSidebar,
   openModal,
   closeModal,
   toggleSideNav,
+  toggleLlmChat,
+  closeLlmChat,
   openDetailSidebar,
   closeDetailSidebar,
   openBlockDetailFromInfoModal,
@@ -52,6 +56,7 @@ const {
       @menu-click="toggleSideNav"
       @record-click="openModal('recording-list')"
       @alarm-click="openModal('alarm')"
+      @llm-click="toggleLlmChat"
     />
 
     <Transition name="slide-left">
@@ -72,6 +77,9 @@ const {
         v-if="detailSidebar === 'area'"
         @close="closeDetailSidebar"
       />
+    </Transition>
+    <Transition name="slide-right">
+      <LlmChatSidebar v-if="isLlmChatOpen" @close="closeLlmChat" />
     </Transition>
 
     <Transition name="modal-fade">

@@ -20,6 +20,7 @@ export type DetailSidebarKind = 'block' | 'area'
 export const useDashboardOverlays = () => {
   const activeModal = ref<DashboardModal | null>(null)
   const isSideNavOpen = ref(false)
+  const isLlmChatOpen = ref(false)
   const detailSidebar = ref<DetailSidebarKind | null>(null)
 
   const openModal = (modal: DashboardModal) => {
@@ -36,6 +37,14 @@ export const useDashboardOverlays = () => {
 
   const closeSideNav = () => {
     isSideNavOpen.value = false
+  }
+
+  const toggleLlmChat = () => {
+    isLlmChatOpen.value = !isLlmChatOpen.value
+  }
+
+  const closeLlmChat = () => {
+    isLlmChatOpen.value = false
   }
 
   const openDetailSidebar = (kind: DetailSidebarKind) => {
@@ -71,11 +80,14 @@ export const useDashboardOverlays = () => {
     activeTwinTabId,
     toggleTwinModal,
     isSideNavOpen,
+    isLlmChatOpen,
     detailSidebar,
     openModal,
     closeModal,
     toggleSideNav,
     closeSideNav,
+    toggleLlmChat,
+    closeLlmChat,
     openDetailSidebar,
     closeDetailSidebar,
     openBlockDetailFromInfoModal,

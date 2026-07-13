@@ -3,10 +3,15 @@ const emit = defineEmits<{
   'menu-click': []
   'record-click': []
   'alarm-click': []
+  'llm-click': []
 }>()
 
 const openWeather = () => {
-  window.open('https://weather.naver.com/', 'naver-weather', 'width=1200,height=900')
+  window.open(
+    'https://weather.naver.com/',
+    'naver-weather',
+    'width=1200,height=900',
+  )
 }
 </script>
 
@@ -91,7 +96,7 @@ const openWeather = () => {
           </div>
         </div>
         <div class="user-area">
-          <div class="llm-button">
+          <button class="llm-button" type="button" @click="emit('llm-click')">
             <img
               class="llm-icon"
               src="@/assets/images/screen-16/icon9.svg"
@@ -100,7 +105,7 @@ const openWeather = () => {
             <div class="llm-text">
               <div class="llm-label">LLM</div>
             </div>
-          </div>
+          </button>
           <div class="user-card">
             <div class="user-info">
               <div class="user-name-wrap">
@@ -286,6 +291,7 @@ button.icon-button {
   width: 60px;
   height: 30px;
   padding: 10px;
+  cursor: pointer;
   background: #555555;
   border: 1px solid #777777;
   border-radius: 3.5px;
