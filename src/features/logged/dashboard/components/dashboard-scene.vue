@@ -92,21 +92,6 @@ const CCTV_ZONES: CctvZone[] = [
 <template>
   <div class="dashboard-scene">
     <img
-      class="scene-image-yard"
-      src="@/assets/images/screen-16/gemini-generated-image-j-7-crf-6-j-7-crf-6-j-7-cr-10.png"
-      alt=""
-    />
-    <img
-      class="scene-image-dock"
-      src="@/assets/images/screen-16/gemini-generated-image-6-dyvzj-6-dyvzj-6-dyv-10.png"
-      alt=""
-    />
-    <img
-      class="scene-image-dock-wide"
-      src="@/assets/images/screen-16/gemini-generated-image-6-dyvzj-6-dyvzj-6-dyv-20.png"
-      alt=""
-    />
-    <img
       class="scene-image-base"
       src="@/assets/images/screen-16/gemini-generated-image-wyy-8-xvwyy-8-xvwyy-8-10.png"
       alt=""
@@ -179,36 +164,6 @@ const CCTV_ZONES: CctvZone[] = [
   height: 1140px;
   overflow: clip;
   pointer-events: none;
-}
-
-.scene-image-yard {
-  position: absolute;
-  top: -96px;
-  left: -148px;
-  width: 2284px;
-  height: 1353px;
-  object-fit: cover;
-  aspect-ratio: 2284 / 1353;
-}
-
-.scene-image-dock {
-  position: absolute;
-  top: -33px;
-  left: -605px;
-  width: 3192px;
-  height: 1312px;
-  object-fit: cover;
-  aspect-ratio: 3192 / 1312;
-}
-
-.scene-image-dock-wide {
-  position: absolute;
-  top: calc(50% - 1096px);
-  left: calc(50% - 3264px);
-  width: 6437px;
-  height: 2646px;
-  object-fit: cover;
-  aspect-ratio: 6437 / 2646;
 }
 
 .scene-image-base {
