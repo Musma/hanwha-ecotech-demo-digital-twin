@@ -12,7 +12,7 @@ interface AlarmField {
 const ALARM_FIELDS: AlarmField[] = [
   {
     label: '발생 위치',
-    value: 'Block 502 · Dock 3 North',
+    value: '기자재공장',
     valueClass: 'value-location',
   },
   { label: '알람 유형', value: '화재 발생', valueClass: 'value-type' },
