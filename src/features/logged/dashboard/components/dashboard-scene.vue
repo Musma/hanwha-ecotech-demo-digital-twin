@@ -138,12 +138,6 @@ const CCTV_ZONES: CctvZone[] = [
       aria-label="블록 상세 보기"
       @click="emit('block-click')"
     />
-    <button
-      class="block-hotspot block-hotspot--yard"
-      type="button"
-      aria-label="블록 상세 보기"
-      @click="emit('block-click')"
-    />
 
     <div
       v-for="zone in CCTV_ZONES"
@@ -281,13 +275,6 @@ const CCTV_ZONES: CctvZone[] = [
   height: 126.61px;
   transform: rotate(-12.233deg) scale(1, 1);
   transform-origin: 0 0;
-}
-
-.block-hotspot--yard {
-  top: 319px;
-  left: 831px;
-  width: 271.5px;
-  height: 140.5px;
 }
 
 .zone-marker {
