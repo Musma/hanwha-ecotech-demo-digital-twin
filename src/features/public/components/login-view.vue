@@ -5,8 +5,8 @@ const emit = defineEmits<{
   login: []
 }>()
 
-const userId = ref('')
-const password = ref('')
+const userId = ref('ecotec')
+const password = ref('1234')
 
 const handleLogin = () => {
   emit('login')
