@@ -226,28 +226,17 @@ const ALARM_FIELDS: AlarmField[] = [
 
 .info-value {
   color: #ffffff;
-  text-align: left;
+  text-align: right;
   font-family: 'Noto Sans KR', sans-serif;
   font-size: 14px;
   font-weight: 400;
+  white-space: nowrap;
   position: absolute;
   top: 0px;
-}
-
-.value-location {
-  left: 36px;
-}
-
-.value-type {
-  left: 103px;
-}
-
-.value-time {
-  left: 114px;
+  right: 0px;
 }
 
 .value-level {
-  left: 69px;
   color: #ef4444;
   font-weight: 700;
 }
