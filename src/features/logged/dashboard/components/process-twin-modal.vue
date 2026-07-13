@@ -54,8 +54,8 @@ const emit = defineEmits<{
   flex-direction: column;
   align-items: center;
   justify-content: space-between;
-  width: 1200px;
-  height: 800px;
+  width: 1700px;
+  height: 90%;
   pointer-events: auto;
   background: rgba(30, 30, 30, 0.9);
   border-radius: 10px;
