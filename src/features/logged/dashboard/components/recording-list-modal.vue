@@ -25,7 +25,7 @@ const emit = defineEmits<{
         </button>
       </header>
       <div class="date-filter">
-        <div class="filter-label">날짜 선택 :</div>
+        <div class="filter-label">날짜 선택</div>
         <div class="date-field">
           <div class="calendar-icon">
             <img
