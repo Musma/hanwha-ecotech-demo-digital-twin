@@ -60,7 +60,6 @@ const handleClose = () => {
             </div>
             <div class="alarm-time">{{ item.occurredAt }}</div>
           </div>
-          <div v-if="item.hasSpacer" class="alarm-spacer" />
           <div class="alarm-actions">
             <button class="action-button-outline" type="button">
               <span class="action-label-outline">위치 이동</span>
@@ -286,18 +285,6 @@ const handleClose = () => {
   display: flex;
   align-items: center;
   justify-content: flex-start;
-}
-
-.alarm-spacer {
-  display: flex;
-  flex-direction: row;
-  gap: 10px;
-  align-items: center;
-  justify-content: flex-start;
-  flex-shrink: 0;
-  width: 100px;
-  height: 40px;
-  position: relative;
 }
 
 .alarm-actions {

@@ -9,8 +9,6 @@ export interface AlarmPopupItem {
   occurredAt: string
   /** export 원본에서 제목 영역에 392px 고정 폭이 지정된 항목 */
   wideTitle?: boolean
-  /** export 원본에서 제목과 버튼 사이에 100px 빈 스페이서가 있는 항목 */
-  hasSpacer?: boolean
 }
 
 export const ALARM_POPUP_TABS: AlarmPopupTab[] = [
@@ -35,6 +33,5 @@ export const ALARM_POPUP_ITEMS: AlarmPopupItem[] = [
     id: 'alarm-3',
     title: '[Critical] 골리앗 크레인 GC-101 점검',
     occurredAt: '발생 시각 : 2026-01-01 16:40:12',
-    hasSpacer: true,
   },
 ]
