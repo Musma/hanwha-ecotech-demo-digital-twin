@@ -1,9 +1,6 @@
 import { onScopeDispose, ref } from 'vue'
 
-import {
-  FAKE_LLM_RESPONSES,
-  INITIAL_LLM_MESSAGES,
-} from '@/features/logged/dashboard/constants/llm-chat'
+import { FAKE_LLM_RESPONSES } from '@/features/logged/dashboard/constants/llm-chat'
 import type { LlmChatMessage } from '@/features/logged/dashboard/types/llm-chat'
 
 const formatTime = (date: Date) => {
@@ -17,7 +14,7 @@ const formatTime = (date: Date) => {
  * 잠깐의 "생각 중" 지연 후 준비된 응답을 순서대로 돌려준다.
  */
 export const useLlmChat = () => {
-  const messages = ref<LlmChatMessage[]>([...INITIAL_LLM_MESSAGES])
+  const messages = ref<LlmChatMessage[]>([])
   const isThinking = ref(false)
 
   let responseIndex = 0
