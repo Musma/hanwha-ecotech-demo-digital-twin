@@ -1,0 +1,26 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap");
+
+/* Global Tailwind v4 entry point. */
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@import "./css/theme.css";
+@import "./css/base.css";
+@import "./css/utilities.css";
+@import "./css/vendors/map.css";
+
+/* case-6 화면은 기존 전역 리셋과 분리된 전용 애플리케이션 영역이다. */
+.tablet-app {
+  color: var(--color-hw-gray-darker);
+  font-family:
+    "HanwhaGothic",
+    "Pretendard",
+    "Noto Sans KR",
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    sans-serif;
+  font-size: 14px;
+  font-weight: 300;
+  letter-spacing: -0.2px;
+}

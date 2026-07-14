@@ -17,6 +17,11 @@ const routes: RouteRecordRaw[] = [
     component: () => import('@/pages/dashboard/index.vue'),
   },
   {
+    path: '/tablet',
+    name: 'tablet',
+    component: () => import('@/pages/tablet/index.vue'),
+  },
+  {
     path: '/:pathMatch(.*)*',
     name: 'not-found',
     component: () => import('@/pages/not-found.vue'),

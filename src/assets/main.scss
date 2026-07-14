@@ -1,7 +1,7 @@
 /* Global SCSS entry point. */
 
 /* Figma export 기준 리셋: 모든 화면 CSS가 이 리셋을 전제로 작성되어 있다. */
-* {
+*:not(.tablet-app):not(.tablet-app *) {
   margin: 0;
   padding: 0;
   border: none;
@@ -30,13 +30,13 @@ body {
   overflow: hidden;
 }
 
-button {
+button:not(.tablet-app *) {
   cursor: pointer;
   font: inherit;
   color: inherit;
 }
 
-input {
+input:not(.tablet-app *) {
   font: inherit;
   color: inherit;
   outline: none;
