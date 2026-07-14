@@ -3,6 +3,9 @@ import { onScopeDispose, ref } from 'vue'
 import { FAKE_LLM_RESPONSE } from '@/features/logged/dashboard/constants/llm-chat'
 import type { LlmChatMessage } from '@/features/logged/dashboard/types/llm-chat'
 
+const LLM_RESPONSE_DELAY_MS = 4900
+const LLM_RESPONSE_DELAY_JITTER_MS = 900
+
 const formatTime = (date: Date) => {
   const hours = String(date.getHours()).padStart(2, '0')
   const minutes = String(date.getMinutes()).padStart(2, '0')
@@ -46,7 +49,7 @@ export const useLlmChat = () => {
         hasResponded = true
         isThinking.value = false
       },
-      1900 + Math.random() * 900,
+      LLM_RESPONSE_DELAY_MS + Math.random() * LLM_RESPONSE_DELAY_JITTER_MS,
     )
   }
 
