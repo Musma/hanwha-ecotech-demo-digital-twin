@@ -4,6 +4,7 @@ const STORAGE_KEY = 'hanwha-logistics-new-obstruction'
 
 export interface DashboardRegisteredObstruction {
   detail: string
+  dispatchRequestAt?: number
   foundAt: string
   id: string
   infoOpenRequestAt?: number
@@ -46,6 +47,10 @@ function normalizeObstruction(
 
   return {
     detail: source.detail,
+    dispatchRequestAt:
+      typeof source.dispatchRequestAt === 'number'
+        ? source.dispatchRequestAt
+        : undefined,
     foundAt: source.foundAt || '',
     id: source.id,
     infoOpenRequestAt:
@@ -98,8 +103,26 @@ export const useLogisticsObstructionStore = defineStore(
         this.registeredObstruction = null
         writeStoredObstruction(null)
       },
+      consumeDispatchRequest() {
+        if (!this.registeredObstruction?.dispatchRequestAt) return
+
+        this.registeredObstruction = {
+          ...this.registeredObstruction,
+          dispatchRequestAt: undefined,
+        }
+        writeStoredObstruction(this.registeredObstruction)
+      },
       reloadRegisteredObstruction() {
         this.registeredObstruction = readStoredObstruction()
+      },
+      requestDispatchInTablet() {
+        if (!this.registeredObstruction) return
+
+        this.registeredObstruction = {
+          ...this.registeredObstruction,
+          dispatchRequestAt: Date.now(),
+        }
+        writeStoredObstruction(this.registeredObstruction)
       },
       requestRegisteredObstructionInfoOpen() {
         if (!this.registeredObstruction) return

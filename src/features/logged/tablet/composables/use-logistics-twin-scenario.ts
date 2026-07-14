@@ -12,7 +12,10 @@ import {
   getLogisticsTwinTone,
   getLogisticsTwinToneLabel,
 } from '@/features/logged/tablet/constants/logistics-twin-data'
-import { useLogisticsObstructionStore } from '@/shared/stores/logistics-obstruction'
+import {
+  type DashboardRegisteredObstruction,
+  useLogisticsObstructionStore,
+} from '@/shared/stores/logistics-obstruction'
 import type { MapEntityMarkerItem } from '@/shared/types/map/yard-map'
 
 const NEW_OBSTRUCTION_VEHICLE_MARKER_OFFSET_Y = -34
@@ -58,6 +61,26 @@ function moveToDashboardRoute() {
   window.location.assign(dashboardUrl.toString())
 }
 
+function createObstructionFromRegistered(
+  registered: DashboardRegisteredObstruction,
+): LogisticsTwinObstruction {
+  return {
+    id: registered.id,
+    label: registered.label || 'OB51',
+    name: registered.name,
+    kind: registered.kind,
+    jibun: registered.locationLabel,
+    phys: registered.phys,
+    lngLat: registered.lngLat,
+    days: 0,
+    foundAt: registered.foundAt,
+    reporter: registered.reporter,
+    status: '확인',
+    detail: registered.detail,
+    photo: registered.photo,
+  }
+}
+
 export function useLogisticsTwinScenario() {
   const logisticsObstructionStore = useLogisticsObstructionStore()
   const currentStep = shallowRef(1)
@@ -73,6 +96,13 @@ export function useLogisticsTwinScenario() {
   const records = shallowRef<LogisticsTwinRecord[]>([])
   const mapViewResetRequest = shallowRef(0)
   const toastMessage = shallowRef('')
+
+  function upsertObstruction(item: LogisticsTwinObstruction) {
+    obstructions.value = [
+      item,
+      ...obstructions.value.filter((obstruction) => obstruction.id !== item.id),
+    ]
+  }
 
   const visibleObstructions = computed(() =>
     obstructions.value.filter((item) => item.status !== '완료'),
@@ -306,10 +336,7 @@ export function useLogisticsTwinScenario() {
       photo: payload.photo || undefined,
     }
 
-    obstructions.value = [
-      newItem,
-      ...obstructions.value.filter((item) => item.id !== newItem.id),
-    ]
+    upsertObstruction(newItem)
     logisticsObstructionStore.setRegisteredObstruction({
       detail: newItem.detail,
       foundAt: newItem.foundAt,
@@ -362,6 +389,23 @@ export function useLogisticsTwinScenario() {
     selectedDispatchResourceCodes.value = []
     dispatchConfirmed.value = false
     showToast('지번체계 기반 간섭물 이동을 요청하였습니다')
+  }
+
+  function startDispatchFromDashboardRequest() {
+    const registered = logisticsObstructionStore.registeredObstruction
+    if (!registered?.dispatchRequestAt) return
+
+    const target = createObstructionFromRegistered(registered)
+    upsertObstruction(target)
+    selectedId.value = target.id
+    markerInfoId.value = ''
+    targetId.value = target.id
+    updateObstructionStatus(target.id, '이동요청')
+    currentStep.value = 5
+    selectedDispatchResourceCodes.value = []
+    dispatchConfirmed.value = false
+    logisticsObstructionStore.consumeDispatchRequest()
+    showToast('디지털 트윈에서 선택한 간섭물 이동 배차를 진행합니다')
   }
 
   function openObstructionInDashboard(item: LogisticsTwinObstruction) {
@@ -452,6 +496,8 @@ export function useLogisticsTwinScenario() {
     toastMessage.value = ''
     mapViewResetRequest.value += 1
   }
+
+  startDispatchFromDashboardRequest()
 
   return {
     closeObstructionInfo,

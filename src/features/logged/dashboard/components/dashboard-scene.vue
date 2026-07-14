@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { ArrowUpRightIcon } from '@lucide/vue'
 import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 
 import iconCctvZoneA from '@/assets/images/screen-16/icon11.svg'
@@ -114,6 +115,19 @@ function handleStorageChange(event: StorageEvent) {
   if (event.key !== 'hanwha-logistics-new-obstruction') return
 
   logisticsObstructionStore.reloadRegisteredObstruction()
+}
+
+function moveToTabletRoute() {
+  const tabletUrl = new URL(import.meta.env.BASE_URL, window.location.origin)
+  tabletUrl.hash = '/tablet'
+  window.location.assign(tabletUrl.toString())
+}
+
+function requestRegisteredObstructionMove() {
+  if (!registeredObstruction.value) return
+
+  logisticsObstructionStore.requestDispatchInTablet()
+  moveToTabletRoute()
 }
 
 watch(
@@ -240,6 +254,15 @@ onUnmounted(() => {
         <p class="registered-obstruction-detail">
           {{ registeredObstruction.detail }}
         </p>
+
+        <button
+          type="button"
+          class="registered-obstruction-request-button"
+          @click="requestRegisteredObstructionMove"
+        >
+          <ArrowUpRightIcon aria-hidden="true" :size="16" :stroke-width="2.4" />
+          간섭물 이동 요청
+        </button>
       </aside>
     </div>
 
@@ -511,6 +534,28 @@ onUnmounted(() => {
   color: rgba(255, 255, 255, 0.84);
   background: rgba(255, 255, 255, 0.06);
   border-radius: 8px;
+}
+
+.registered-obstruction-request-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 42px;
+  margin-top: 12px;
+  font-size: 14px;
+  font-weight: 800;
+  color: #ffffff;
+  cursor: pointer;
+  background: #ed7100;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 8px;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.26);
+}
+
+.registered-obstruction-request-button svg {
+  margin-right: 6px;
+  flex: 0 0 auto;
 }
 
 .zone-marker {
