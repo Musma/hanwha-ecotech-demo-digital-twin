@@ -7,6 +7,7 @@ import type {
   LogisticsTwinObstruction,
   LogisticsTwinPendingLocation,
   LogisticsTwinRecord,
+  LogisticsTwinRegisterPayload,
 } from '@/features/logged/tablet/constants/logistics-twin-data'
 
 defineProps<{
@@ -21,7 +22,8 @@ defineProps<{
 }>()
 
 const emit = defineEmits<{
-  registerObstruction: [photo: string | null]
+  openDashboard: [item: LogisticsTwinObstruction]
+  registerObstruction: [payload: LogisticsTwinRegisterPayload]
   selectObstruction: [item: LogisticsTwinObstruction]
   requestMove: [item: LogisticsTwinObstruction]
   confirmDispatch: []
@@ -43,6 +45,7 @@ const emit = defineEmits<{
     v-else-if="currentStep === 4"
     :obstructions="obstructions"
     :selected-obstruction="selectedObstruction"
+    @open-dashboard="emit('openDashboard', $event)"
     @select-obstruction="emit('selectObstruction', $event)"
     @request-move="emit('requestMove', $event)"
   />

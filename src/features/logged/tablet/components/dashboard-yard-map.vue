@@ -55,7 +55,6 @@ interface LivePosition {
 }
 
 interface Props {
-  fixedOverlayVisible: boolean
   gridVisible?: boolean
   mapStyle: string
   mapMarkers?: MapEntityMarkerItem[]
@@ -122,13 +121,6 @@ const JIBUN_POLYGON_LINE_LAYER_ID = 'dashboard-jibun-polygon-line'
 const WORK_TRACK_SOURCE_ID = 'dashboard-work-track'
 const WORK_TRACK_LAYER_ID = 'dashboard-work-track'
 
-type ImageOverlayCoordinates = [
-  [number, number],
-  [number, number],
-  [number, number],
-  [number, number],
-]
-
 const YARD_GRID_ORIGIN = {
   lat: YARD_DEFAULT_CENTER[1],
   lng: YARD_DEFAULT_CENTER[0],
@@ -182,39 +174,13 @@ function handleLocationPick(event: MapMouseEvent) {
   const matched = /^\((\d+),\s*(\d+)\)$/.exec(label)
   if (!matched) return
 
+  const phys: [number, number] = [Number(matched[1]), Number(matched[2])]
   emit('pickLocation', {
     label,
-    phys: [Number(matched[1]), Number(matched[2])],
+    phys,
     lngLat: [event.lngLat.lng, event.lngLat.lat],
   })
 }
-
-const YARD_CAD_IMAGE_OVERLAYS = [
-  {
-    sourceId: 'yard-cad-image-2yard',
-    layerId: 'yard-cad-image-2yard',
-    label: '2YARD',
-    url: `${import.meta.env.BASE_URL}yard2.png`,
-    coordinates: [
-      [127.587585, 34.899842],
-      [127.590244, 34.901574],
-      [127.594853, 34.896818],
-      [127.592158, 34.895121],
-    ] satisfies ImageOverlayCoordinates,
-  },
-  {
-    sourceId: 'yard-cad-image-1yard',
-    layerId: 'yard-cad-image-1yard',
-    label: '1YARD',
-    url: `${import.meta.env.BASE_URL}yard1.png`,
-    coordinates: [
-      [127.590772, 34.901531],
-      [127.601043, 34.90818],
-      [127.603523, 34.905675],
-      [127.593202, 34.899038],
-    ] satisfies ImageOverlayCoordinates,
-  },
-]
 
 function createGridFeatureCollection(): DashboardGeoJsonFeatureCollection {
   const corners = YARD_GRID_BOUNDARY.map(([lng, lat]) => ({ lat, lng }))
@@ -285,29 +251,9 @@ function createPolygonFeatureCollection(): DashboardGeoJsonFeatureCollection {
   }
 }
 
-function ensureDashboardOverlayLayers() {
+function ensureDashboardGridLayer() {
   const map = mapRef.value
   if (!map) return
-
-  for (const overlay of YARD_CAD_IMAGE_OVERLAYS) {
-    if (!map.getSource(overlay.sourceId)) {
-      map.addSource(overlay.sourceId, {
-        type: 'image',
-        url: overlay.url,
-        coordinates: overlay.coordinates,
-      })
-    }
-    if (!map.getLayer(overlay.layerId)) {
-      map.addLayer({
-        id: overlay.layerId,
-        type: 'raster',
-        source: overlay.sourceId,
-        paint: {
-          'raster-opacity': 1,
-        },
-      })
-    }
-  }
 
   if (!map.getSource(YARD_GRID_SOURCE_ID)) {
     map.addSource(YARD_GRID_SOURCE_ID, {
@@ -328,20 +274,6 @@ function ensureDashboardOverlayLayers() {
         'line-width': 1.4,
       },
     })
-  }
-}
-
-function updateCadVisibility() {
-  const map = mapRef.value
-  if (!map || !mapLoaded.value) return
-
-  for (const overlay of YARD_CAD_IMAGE_OVERLAYS) {
-    if (!map.getLayer(overlay.layerId)) continue
-    map.setLayoutProperty(
-      overlay.layerId,
-      'visibility',
-      props.fixedOverlayVisible ? 'visible' : 'none',
-    )
   }
 }
 
@@ -806,8 +738,7 @@ function initializeMap() {
       zoom: map.getZoom(),
     }
     mapLoaded.value = true
-    ensureDashboardOverlayLayers()
-    updateCadVisibility()
+    ensureDashboardGridLayer()
     updateGridVisibility()
     updateJibunLayers()
     updateMarkers()
@@ -833,8 +764,7 @@ function syncMapStyle() {
       zoom: map.getZoom(),
     })
     mapLoaded.value = true
-    ensureDashboardOverlayLayers()
-    updateCadVisibility()
+    ensureDashboardGridLayer()
     updateGridVisibility()
     updateJibunLayers()
     updateMarkers()
@@ -845,11 +775,6 @@ function syncMapStyle() {
     requestAnimationFrame(() => map.resize())
   })
 }
-
-watch(
-  () => props.fixedOverlayVisible,
-  () => updateCadVisibility(),
-)
 
 watch(
   () => props.mapStyle,

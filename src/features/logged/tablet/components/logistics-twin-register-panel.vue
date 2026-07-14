@@ -1,16 +1,33 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
 
-import type { LogisticsTwinPendingLocation } from '@/features/logged/tablet/constants/logistics-twin-data'
+import type {
+  LogisticsTwinPendingLocation,
+  LogisticsTwinRegisterPayload,
+} from '@/features/logged/tablet/constants/logistics-twin-data'
 
 const props = defineProps<{
   pendingLocation: LogisticsTwinPendingLocation | null
 }>()
 
 const emit = defineEmits<{
-  registerObstruction: [photo: string | null]
+  registerObstruction: [payload: LogisticsTwinRegisterPayload]
 }>()
 
+const DEFAULT_OBSTRUCTION_DETAIL = '현장에서 등재된 도로 간섭물입니다.'
+const DEFAULT_OBSTRUCTION_KIND = '자재(배관)'
+const DEFAULT_OBSTRUCTION_NAME = '신규 적치 자재'
+const OBSTRUCTION_KIND_OPTIONS = [
+  '자재(배관)',
+  '폐기물',
+  '장비',
+  '자재(강재)',
+  '기타',
+]
+
+const obstructionName = ref(DEFAULT_OBSTRUCTION_NAME)
+const obstructionKind = ref(DEFAULT_OBSTRUCTION_KIND)
+const obstructionDetail = ref(DEFAULT_OBSTRUCTION_DETAIL)
 const photo = ref<string | null>(null)
 const photoError = ref('')
 
@@ -20,6 +37,9 @@ const SUPPORTED_PHOTO_NAME_PATTERN = /\.(jpe?g|png)$/i
 watch(
   () => props.pendingLocation?.label,
   () => {
+    obstructionName.value = DEFAULT_OBSTRUCTION_NAME
+    obstructionKind.value = DEFAULT_OBSTRUCTION_KIND
+    obstructionDetail.value = DEFAULT_OBSTRUCTION_DETAIL
     photo.value = null
     photoError.value = ''
   },
@@ -56,6 +76,15 @@ function handlePhotoChange(event: Event) {
 function removePhoto() {
   photo.value = null
   photoError.value = ''
+}
+
+function submitObstruction() {
+  emit('registerObstruction', {
+    detail: obstructionDetail.value.trim() || DEFAULT_OBSTRUCTION_DETAIL,
+    kind: obstructionKind.value,
+    name: obstructionName.value.trim() || DEFAULT_OBSTRUCTION_NAME,
+    photo: photo.value,
+  })
 }
 </script>
 
@@ -163,8 +192,7 @@ function removePhoto() {
         <label class="block text-c1 font-semibold text-hw-gray-dark">
           간섭물명
           <input
-            value="신규 적치 자재"
-            readonly
+            v-model="obstructionName"
             :disabled="!pendingLocation"
             class="mt-1 w-full rounded-md border border-hw-gray-lighter bg-hw-white-main px-3 py-2 text-b3 text-hw-text-primary disabled:bg-hw-white-dark disabled:text-hw-gray-main"
           />
@@ -172,20 +200,26 @@ function removePhoto() {
         <label class="block text-c1 font-semibold text-hw-gray-dark">
           간섭물 종류
           <select
-            disabled
+            v-model="obstructionKind"
+            :disabled="!pendingLocation"
             class="mt-1 w-full rounded-md border border-hw-gray-lighter bg-hw-white-main px-3 py-2 text-b3 text-hw-text-primary disabled:bg-hw-white-dark disabled:text-hw-gray-main"
           >
-            <option>자재(배관)</option>
+            <option
+              v-for="kindOption in OBSTRUCTION_KIND_OPTIONS"
+              :key="kindOption"
+              :value="kindOption"
+            >
+              {{ kindOption }}
+            </option>
           </select>
         </label>
         <label class="block text-c1 font-semibold text-hw-gray-dark">
           상세 내용
           <textarea
-            readonly
+            v-model="obstructionDetail"
             :disabled="!pendingLocation"
             rows="3"
             class="mt-1 w-full resize-none rounded-md border border-hw-gray-lighter bg-hw-white-main px-3 py-2 text-b3 text-hw-text-primary disabled:bg-hw-white-dark disabled:text-hw-gray-main"
-            value="현장에서 등재된 도로 간섭물입니다."
           />
         </label>
         <p class="text-c1 text-hw-gray-dark">
@@ -202,7 +236,7 @@ function removePhoto() {
         type="button"
         class="w-full rounded-md bg-hw-orange-main px-4 py-3 text-s2 font-bold text-hw-white-main transition-colors hover:bg-hw-orange-dark disabled:bg-hw-gray-main"
         :disabled="!pendingLocation"
-        @click="emit('registerObstruction', photo)"
+        @click="submitObstruction"
       >
         <i class="ti ti-circle-plus mr-1" aria-hidden="true" />
         간섭물 등록

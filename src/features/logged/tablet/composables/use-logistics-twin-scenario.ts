@@ -7,10 +7,12 @@ import {
   type LogisticsTwinObstruction,
   type LogisticsTwinPendingLocation,
   type LogisticsTwinRecord,
+  type LogisticsTwinRegisterPayload,
   getLogisticsTwinDestination,
   getLogisticsTwinTone,
   getLogisticsTwinToneLabel,
 } from '@/features/logged/tablet/constants/logistics-twin-data'
+import { useLogisticsObstructionStore } from '@/shared/stores/logistics-obstruction'
 import type { MapEntityMarkerItem } from '@/shared/types/map/yard-map'
 
 const NEW_OBSTRUCTION_VEHICLE_MARKER_OFFSET_Y = -34
@@ -48,7 +50,16 @@ function compactRouteCoordinates(coordinates: Array<[number, number]>) {
   )
 }
 
+function moveToDashboardRoute() {
+  if (typeof window === 'undefined') return
+
+  const dashboardUrl = new URL(import.meta.env.BASE_URL, window.location.origin)
+  dashboardUrl.hash = '/dashboard'
+  window.location.assign(dashboardUrl.toString())
+}
+
 export function useLogisticsTwinScenario() {
+  const logisticsObstructionStore = useLogisticsObstructionStore()
   const currentStep = shallowRef(1)
   const obstructions = shallowRef<LogisticsTwinObstruction[]>(
     LOGISTICS_TWIN_OBSTRUCTIONS.map((item) => ({ ...item })),
@@ -273,18 +284,17 @@ export function useLogisticsTwinScenario() {
 
   function pickRegisterLocation(location: LogisticsTwinPendingLocation) {
     pendingLocation.value = location
-    showToast('가시화 화면에서 간섭물 위치가 선택되었습니다')
   }
 
-  function registerObstruction(photo: string | null) {
+  function registerObstruction(payload: LogisticsTwinRegisterPayload) {
     const pending = pendingLocation.value
     if (!pending) return
 
     const newItem: LogisticsTwinObstruction = {
       id: LOGISTICS_TWIN_NEW_OBSTRUCTION_ID,
       label: 'OB51',
-      name: '신규 적치 자재',
-      kind: '자재(배관)',
+      name: payload.name,
+      kind: payload.kind,
       jibun: '1Y-도로-084-011',
       phys: pending.phys,
       lngLat: pending.lngLat,
@@ -292,14 +302,28 @@ export function useLogisticsTwinScenario() {
       foundAt: '2026.05.22 13:20',
       reporter: 'HSE 담당자',
       status: '확인',
-      detail: '현장에서 등재된 도로 간섭물입니다.',
-      photo: photo || undefined,
+      detail: payload.detail,
+      photo: payload.photo || undefined,
     }
 
     obstructions.value = [
       newItem,
       ...obstructions.value.filter((item) => item.id !== newItem.id),
     ]
+    logisticsObstructionStore.setRegisteredObstruction({
+      detail: newItem.detail,
+      foundAt: newItem.foundAt,
+      id: newItem.id,
+      kind: newItem.kind,
+      label: newItem.label,
+      lngLat: newItem.lngLat,
+      locationLabel: pending.label,
+      name: newItem.name,
+      photo: newItem.photo,
+      phys: newItem.phys,
+      reporter: newItem.reporter,
+      status: newItem.status,
+    })
     selectedId.value = newItem.id
     markerInfoId.value = newItem.id
     pendingLocation.value = null
@@ -338,6 +362,29 @@ export function useLogisticsTwinScenario() {
     selectedDispatchResourceCodes.value = []
     dispatchConfirmed.value = false
     showToast('지번체계 기반 간섭물 이동을 요청하였습니다')
+  }
+
+  function openObstructionInDashboard(item: LogisticsTwinObstruction) {
+    const registered = logisticsObstructionStore.registeredObstruction
+    const locationLabel =
+      registered?.id === item.id ? registered.locationLabel : item.jibun
+
+    logisticsObstructionStore.setRegisteredObstruction({
+      detail: item.detail,
+      foundAt: item.foundAt,
+      id: item.id,
+      kind: item.kind,
+      label: item.label,
+      lngLat: item.lngLat,
+      locationLabel,
+      name: item.name,
+      photo: item.photo,
+      phys: item.phys,
+      reporter: item.reporter,
+      status: item.status,
+    })
+    logisticsObstructionStore.requestRegisteredObstructionInfoOpen()
+    moveToDashboardRoute()
   }
 
   function toggleDispatchResource(code: string) {
@@ -414,6 +461,7 @@ export function useLogisticsTwinScenario() {
     dispatchConfirmed,
     mapViewResetRequest,
     mapMarkers,
+    openObstructionInDashboard,
     pendingLocation,
     pickRegisterLocation,
     records,

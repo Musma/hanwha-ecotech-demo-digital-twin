@@ -10,6 +10,7 @@ defineProps<{
 }>()
 
 const emit = defineEmits<{
+  openDashboard: [item: LogisticsTwinObstruction]
   selectObstruction: [item: LogisticsTwinObstruction]
   requestMove: [item: LogisticsTwinObstruction]
 }>()
@@ -67,11 +68,22 @@ const emit = defineEmits<{
     </div>
 
     <div
-      class="-mx-4 -mb-4 mt-4 grid shrink-0 grid-cols-1 border-t border-hw-gray-lighter bg-hw-white-lighter p-3"
+      class="-mx-4 -mb-4 mt-4 grid shrink-0 grid-cols-2 gap-2 border-t border-hw-gray-lighter bg-hw-white-lighter p-3"
     >
       <button
         type="button"
-        class="rounded-md bg-hw-orange-main px-3 py-3 text-s2 font-bold text-hw-white-main transition-colors hover:bg-hw-orange-dark disabled:cursor-not-allowed disabled:bg-hw-gray-main"
+        class="flex items-center justify-center gap-1 rounded-md border border-hw-orange-main bg-hw-white-main px-3 py-3 text-center text-c1 font-bold leading-tight text-hw-orange-main transition-colors hover:bg-hw-orange-lighter/20 disabled:cursor-not-allowed disabled:border-hw-gray-main disabled:text-hw-gray-main"
+        :disabled="!selectedObstruction"
+        @click="
+          selectedObstruction && emit('openDashboard', selectedObstruction)
+        "
+      >
+        <i class="ti ti-building-factory-2 mr-1" aria-hidden="true" />
+        디지털 트윈에서 확인
+      </button>
+      <button
+        type="button"
+        class="flex items-center justify-center gap-1 rounded-md bg-hw-orange-main px-3 py-3 text-center text-c1 font-bold leading-tight text-hw-white-main transition-colors hover:bg-hw-orange-dark disabled:cursor-not-allowed disabled:bg-hw-gray-main"
         :disabled="!selectedObstruction"
         @click="selectedObstruction && emit('requestMove', selectedObstruction)"
       >

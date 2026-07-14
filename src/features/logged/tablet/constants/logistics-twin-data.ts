@@ -32,6 +32,13 @@ export interface LogisticsTwinPendingLocation {
   lngLat: [number, number]
 }
 
+export interface LogisticsTwinRegisterPayload {
+  detail: string
+  kind: string
+  name: string
+  photo: string | null
+}
+
 export interface LogisticsTwinDispatchResource {
   code: string
   group: string

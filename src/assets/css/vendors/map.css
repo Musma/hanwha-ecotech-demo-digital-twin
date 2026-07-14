@@ -144,10 +144,11 @@
 
 /* 대시보드 도로 간섭물 태그 마커 */
 .dashboard-map-marker {
-  position: relative;
+  position: absolute;
   display: flex;
   align-items: center;
   justify-content: center;
+  width: max-content;
   min-width: 28px;
   height: 28px;
   padding: 0 8px;

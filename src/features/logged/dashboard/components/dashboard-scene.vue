@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
+
 import iconCctvZoneA from '@/assets/images/screen-16/icon11.svg'
 import iconCctvZoneC from '@/assets/images/screen-16/icon12.svg'
 import iconCctvZoneD from '@/assets/images/screen-16/icon13.svg'
@@ -8,6 +10,7 @@ import iconCctvZoneH from '@/assets/images/screen-16/icon16.svg'
 import iconCctvZoneG from '@/assets/images/screen-16/icon17.svg'
 import iconCctvZoneE from '@/assets/images/screen-16/icon18.svg'
 import iconCctvZoneI from '@/assets/images/screen-16/icon19.svg'
+import { useLogisticsObstructionStore } from '@/shared/stores/logistics-obstruction'
 
 const emit = defineEmits<{
   'block-click': []
@@ -87,6 +90,57 @@ const CCTV_ZONES: CctvZone[] = [
     icon: iconCctvZoneI,
   },
 ]
+
+const logisticsObstructionStore = useLogisticsObstructionStore()
+const isRegisteredObstructionInfoOpen = ref(false)
+const registeredObstruction = computed(
+  () => logisticsObstructionStore.registeredObstruction,
+)
+
+const registeredObstructionRows = computed(() => {
+  const obstruction = registeredObstruction.value
+  if (!obstruction) return []
+
+  return [
+    { label: '종류', value: obstruction.kind },
+    { label: '위치', value: obstruction.locationLabel },
+    { label: '발견시기', value: obstruction.foundAt },
+    { label: '상태', value: obstruction.status },
+    { label: '보고자', value: obstruction.reporter },
+  ]
+})
+
+function handleStorageChange(event: StorageEvent) {
+  if (event.key !== 'hanwha-logistics-new-obstruction') return
+
+  logisticsObstructionStore.reloadRegisteredObstruction()
+}
+
+watch(
+  () => registeredObstruction.value?.id,
+  () => {
+    isRegisteredObstructionInfoOpen.value = false
+  },
+)
+
+watch(
+  () => registeredObstruction.value?.infoOpenRequestAt,
+  (requestAt) => {
+    if (!requestAt || !registeredObstruction.value) return
+
+    isRegisteredObstructionInfoOpen.value = true
+  },
+  { immediate: true },
+)
+
+onMounted(() => {
+  logisticsObstructionStore.reloadRegisteredObstruction()
+  window.addEventListener('storage', handleStorageChange)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('storage', handleStorageChange)
+})
 </script>
 
 <template>
@@ -123,6 +177,71 @@ const CCTV_ZONES: CctvZone[] = [
       aria-label="블록 상세 보기"
       @click="emit('block-click')"
     />
+
+    <div
+      v-if="registeredObstruction"
+      class="registered-obstruction-marker"
+      :class="{
+        'registered-obstruction-marker--active':
+          isRegisteredObstructionInfoOpen,
+      }"
+    >
+      <button
+        class="registered-obstruction-button"
+        type="button"
+        :aria-label="`${registeredObstruction.name} 간섭물 정보 보기`"
+        @click="
+          isRegisteredObstructionInfoOpen = !isRegisteredObstructionInfoOpen
+        "
+      >
+        <span class="registered-obstruction-label">
+          {{ registeredObstruction.label || '신규' }}
+        </span>
+      </button>
+
+      <aside
+        v-if="isRegisteredObstructionInfoOpen"
+        class="registered-obstruction-info"
+        :aria-label="`${registeredObstruction.name} 간섭물 상세 정보`"
+      >
+        <header class="registered-obstruction-info-header">
+          <div>
+            <p class="registered-obstruction-eyebrow">도로 간섭물</p>
+            <h3>{{ registeredObstruction.name }}</h3>
+          </div>
+          <button
+            type="button"
+            class="registered-obstruction-close"
+            aria-label="간섭물 정보 닫기"
+            @click="isRegisteredObstructionInfoOpen = false"
+          >
+            <span aria-hidden="true">×</span>
+          </button>
+        </header>
+
+        <img
+          v-if="registeredObstruction.photo"
+          class="registered-obstruction-photo"
+          :src="registeredObstruction.photo"
+          :alt="`${registeredObstruction.name} 현장 사진`"
+        />
+
+        <dl class="registered-obstruction-info-list">
+          <div
+            v-for="row in registeredObstructionRows"
+            :key="row.label"
+            class="registered-obstruction-info-row"
+          >
+            <dt>{{ row.label }}</dt>
+            <dd>{{ row.value }}</dd>
+          </div>
+        </dl>
+
+        <p class="registered-obstruction-detail">
+          {{ registeredObstruction.detail }}
+        </p>
+      </aside>
+    </div>
 
     <div
       v-for="zone in CCTV_ZONES"
@@ -230,6 +349,168 @@ const CCTV_ZONES: CctvZone[] = [
   height: 126.61px;
   transform: rotate(-12.233deg) scale(1, 1);
   transform-origin: 0 0;
+}
+
+.registered-obstruction-marker {
+  position: absolute;
+  top: 570px;
+  left: 960px;
+  z-index: 8;
+  width: 1px;
+  height: 1px;
+  pointer-events: auto;
+}
+
+.registered-obstruction-button {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 54px;
+  height: 34px;
+  padding: 0 12px;
+  font-family: 'Noto Sans KR', sans-serif;
+  font-size: 14px;
+  font-weight: 800;
+  color: #ffffff;
+  cursor: pointer;
+  background: rgba(237, 113, 0, 0.96);
+  border: 2px solid rgba(255, 255, 255, 0.95);
+  border-radius: 999px;
+  box-shadow:
+    0 8px 18px rgba(0, 0, 0, 0.45),
+    0 0 18px rgba(237, 113, 0, 0.68);
+  transform: translate(-50%, -50%);
+}
+
+.registered-obstruction-marker--active .registered-obstruction-button {
+  background: #ef4444;
+  box-shadow:
+    0 8px 18px rgba(0, 0, 0, 0.45),
+    0 0 18px rgba(239, 68, 68, 0.68);
+}
+
+.registered-obstruction-label {
+  position: relative;
+  z-index: 1;
+  white-space: nowrap;
+}
+
+.registered-obstruction-info {
+  position: absolute;
+  top: -28px;
+  left: 0;
+  width: 430px;
+  padding: 16px;
+  font-family: 'Noto Sans KR', sans-serif;
+  color: #ffffff;
+  background: rgba(30, 30, 30, 0.92);
+  border: 1px solid rgba(237, 113, 0, 0.72);
+  border-radius: 12px;
+  box-shadow:
+    0 18px 48px rgba(0, 0, 0, 0.48),
+    0 0 22px rgba(237, 113, 0, 0.18);
+  backdrop-filter: blur(8px);
+  transform: translate(-50%, -100%);
+}
+
+.registered-obstruction-info::before {
+  position: absolute;
+  bottom: -8px;
+  left: calc(50% - 7px);
+  width: 14px;
+  height: 14px;
+  content: '';
+  background: rgba(30, 30, 30, 0.92);
+  border-right: 1px solid rgba(237, 113, 0, 0.72);
+  border-bottom: 1px solid rgba(237, 113, 0, 0.72);
+  transform: rotate(45deg);
+}
+
+.registered-obstruction-info-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.registered-obstruction-eyebrow {
+  margin: 0 0 4px;
+  font-size: 12px;
+  font-weight: 800;
+  color: #ed7100;
+}
+
+.registered-obstruction-info h3 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 800;
+  line-height: 1.35;
+}
+
+.registered-obstruction-close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  color: rgba(255, 255, 255, 0.82);
+  cursor: pointer;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 999px;
+}
+
+.registered-obstruction-close span {
+  font-size: 18px;
+  line-height: 1;
+}
+
+.registered-obstruction-photo {
+  width: 100%;
+  height: 126px;
+  margin-top: 12px;
+  object-fit: cover;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+}
+
+.registered-obstruction-info-list {
+  display: grid;
+  grid-template-columns: 86px minmax(0, 1fr);
+  row-gap: 8px;
+  margin: 12px 0 0;
+  font-size: 13px;
+}
+
+.registered-obstruction-info-row {
+  display: contents;
+}
+
+.registered-obstruction-info-row dt {
+  color: rgba(255, 255, 255, 0.58);
+}
+
+.registered-obstruction-info-row dd {
+  min-width: 0;
+  margin: 0;
+  overflow-wrap: anywhere;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.94);
+}
+
+.registered-obstruction-detail {
+  margin: 12px 0 0;
+  padding: 10px;
+  font-size: 13px;
+  line-height: 1.55;
+  color: rgba(255, 255, 255, 0.84);
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 8px;
 }
 
 .zone-marker {
