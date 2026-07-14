@@ -5,6 +5,7 @@ import { useLlmChat } from '@/features/logged/dashboard/composables/use-llm-chat
 
 const emit = defineEmits<{
   close: []
+  'open-process-twin': []
 }>()
 
 const { messages, isThinking, ask } = useLlmChat()
@@ -63,7 +64,17 @@ watch(
           class="chat-message"
           :class="`chat-message--${message.role}`"
         >
-          <div class="chat-bubble">{{ message.text }}</div>
+          <div class="chat-bubble">
+            {{ message.text }}
+            <button
+              v-if="message.role === 'assistant'"
+              class="confirm-button"
+              type="button"
+              @click="emit('open-process-twin')"
+            >
+              확인
+            </button>
+          </div>
           <div class="chat-time">{{ message.time }}</div>
         </div>
         <div v-if="isThinking" class="chat-message chat-message--assistant">
@@ -194,6 +205,17 @@ watch(
 .chat-message--user .chat-bubble {
   background: #ed7100;
   border-radius: 8px 2px 8px 8px;
+}
+
+.confirm-button {
+  display: block;
+  margin-top: 12px;
+  margin-left: auto;
+  font-family: 'Noto Sans KR', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  color: #4da3ff;
+  cursor: pointer;
 }
 
 .chat-time {

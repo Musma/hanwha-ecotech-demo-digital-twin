@@ -80,7 +80,11 @@ const {
     </Transition>
     <!-- v-show 유지: 닫아도 대화 기록이 남도록 언마운트하지 않는다 -->
     <Transition name="slide-right">
-      <LlmChatSidebar v-show="isLlmChatOpen" @close="closeLlmChat" />
+      <LlmChatSidebar
+        v-show="isLlmChatOpen"
+        @close="closeLlmChat"
+        @open-process-twin="openModal('twin-process')"
+      />
     </Transition>
 
     <Transition name="modal-fade">
