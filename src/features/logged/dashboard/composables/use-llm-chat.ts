@@ -3,7 +3,7 @@ import { onScopeDispose, ref } from 'vue'
 import { FAKE_LLM_RESPONSE } from '@/features/logged/dashboard/constants/llm-chat'
 import type { LlmChatMessage } from '@/features/logged/dashboard/types/llm-chat'
 
-const LLM_RESPONSE_DELAY_MS = 4900
+const LLM_RESPONSE_DELAY_MS = 6900
 const LLM_RESPONSE_DELAY_JITTER_MS = 900
 
 const formatTime = (date: Date) => {
