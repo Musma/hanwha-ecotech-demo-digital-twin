@@ -46,7 +46,7 @@ export const useLlmChat = () => {
         hasResponded = true
         isThinking.value = false
       },
-      900 + Math.random() * 900,
+      1900 + Math.random() * 900,
     )
   }
 
