@@ -86,12 +86,12 @@ const emit = defineEmits<{ 'tab-click': [tabId: string] }>()
   display: flex;
   flex-direction: row;
   flex-shrink: 0;
-  gap: 5px;
+  gap: 8px;
   align-items: center;
   justify-content: center;
-  width: 150px;
+  min-width: 150px;
   height: 40px;
-  padding: 10px 20px;
+  padding: 0 20px;
   cursor: pointer;
   background: #333333;
   border: 2px solid #999999;
@@ -105,8 +105,8 @@ const emit = defineEmits<{ 'tab-click': [tabId: string] }>()
 .twin-tab-icon-box {
   position: relative;
   flex-shrink: 0;
-  width: 30px;
-  height: 30px;
+  width: 24px;
+  height: 24px;
   aspect-ratio: 1;
 }
 
@@ -114,8 +114,8 @@ const emit = defineEmits<{ 'tab-click': [tabId: string] }>()
   position: absolute;
   top: 50%;
   left: 0;
-  width: 30px;
-  height: 30px;
+  width: 24px;
+  height: 24px;
   object-fit: cover;
   translate: 0 -50%;
   aspect-ratio: 1;
@@ -124,10 +124,11 @@ const emit = defineEmits<{ 'tab-click': [tabId: string] }>()
 .twin-tab-label {
   position: relative;
   font-family: 'Noto Sans KR', sans-serif;
-  font-size: 20px;
+  font-size: 16px;
   font-weight: 700;
-  line-height: 16.5px;
+  line-height: 1;
   color: #ffffff;
   text-align: center;
+  white-space: nowrap;
 }
 </style>
