@@ -54,6 +54,7 @@ export interface MapEntityMarkerItem {
   name?: string
   iconClass?: string
   phys?: number[]
+  anchor?: 'bottom' | 'center'
   offset?: [number, number]
   selected?: boolean
   selectable?: boolean

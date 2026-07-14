@@ -663,7 +663,7 @@ function updateMarkers() {
 
       const mapMarker = new maplibregl.Marker({
         element: el,
-        anchor: 'bottom',
+        anchor: marker.anchor ?? 'bottom',
         offset: marker.offset ?? [0, 0],
       })
         .setLngLat([marker.phys[0], marker.phys[1]])

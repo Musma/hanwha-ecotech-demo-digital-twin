@@ -135,6 +135,7 @@ export function useLogisticsTwinScenario() {
           label: '신규',
           name: `등재 위치 ${pendingLocation.value.label}`,
           phys: pendingLocation.value.lngLat,
+          anchor: 'center',
           selected: true,
           showWave: false,
           tone: 'obstruction-warn',
