@@ -5,7 +5,6 @@
         <div class="minimap-title">미니맵</div>
       </div>
       <div class="minimap-body">
-        <!-- 원본 export의 mask-group0.svg가 0바이트 빈 파일이라 씬 항공뷰 썸네일로 대체한다 -->
         <img
           class="minimap-image"
           src="@/assets/images/screen-16/minimap-map.png"
