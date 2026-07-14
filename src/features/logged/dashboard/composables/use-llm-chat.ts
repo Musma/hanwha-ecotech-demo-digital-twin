@@ -1,6 +1,6 @@
 import { onScopeDispose, ref } from 'vue'
 
-import { FAKE_LLM_RESPONSES } from '@/features/logged/dashboard/constants/llm-chat'
+import { FAKE_LLM_RESPONSE } from '@/features/logged/dashboard/constants/llm-chat'
 import type { LlmChatMessage } from '@/features/logged/dashboard/types/llm-chat'
 
 const formatTime = (date: Date) => {
@@ -11,19 +11,19 @@ const formatTime = (date: Date) => {
 
 /**
  * 가짜 LLM 대화 상태. 실제 모델 호출 없이 질문을 넣으면
- * 잠깐의 "생각 중" 지연 후 준비된 응답을 순서대로 돌려준다.
+ * 잠깐의 "생각 중" 지연 후 준비된 응답을 한 번만 돌려준다.
  */
 export const useLlmChat = () => {
   const messages = ref<LlmChatMessage[]>([])
   const isThinking = ref(false)
 
-  let responseIndex = 0
+  let hasResponded = false
   let messageSeq = 0
   let replyTimer: ReturnType<typeof setTimeout> | null = null
 
   const ask = (question: string) => {
     const text = question.trim()
-    if (!text || isThinking.value) return
+    if (!text || isThinking.value || hasResponded) return
 
     messageSeq += 1
     messages.value.push({
@@ -40,10 +40,10 @@ export const useLlmChat = () => {
         messages.value.push({
           id: `assistant-${messageSeq}`,
           role: 'assistant',
-          text: FAKE_LLM_RESPONSES[responseIndex % FAKE_LLM_RESPONSES.length],
+          text: FAKE_LLM_RESPONSE,
           time: formatTime(new Date()),
         })
-        responseIndex += 1
+        hasResponded = true
         isThinking.value = false
       },
       900 + Math.random() * 900,

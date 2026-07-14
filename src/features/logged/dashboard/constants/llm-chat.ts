@@ -1,11 +1,25 @@
-/** 어떤 질문이 와도 순서대로 하나씩 돌려주는 가짜 응답 풀 */
-export const FAKE_LLM_RESPONSES: string[] = [
-  'Digital Twin AI ready. I have full visibility into all vessels, blocks, and work orders. Block 502 (Vessel 2585-LNG · Maran Gas) is flagged with a weld inspection pending. Completion is at 78% — ETA to Phase 3 handoff is approximately 3.4 days.',
-  'Equipment utilization for 2585-LNG: • Gantry Crane #3 — 91% (overloaded) • Mobile Crane #7 — 64% • Blasting Unit #2 — 38% (standby)  Recommend redistributing Crane #3 load to Mobile Crane #7 to reduce fatigue risk.',
-  'Block 4074-50A-502 is in 선각 대조립 at 75% progress. Next milestone: 선행 도장 handoff scheduled for 07/15. Workfront checks are all green except 선행 검사 (HOLD — approval pending).',
-  'CCTV-C ZONE currently has 1 active safety alarm (PPE violation, danger level: HIGH). Nearest safety officer is 240m away — I recommend dispatching them now.',
-  'Yard E-2 staging area is at 68% capacity with Block 4074-50A-502 (145 Ton) placed since 05/28. Outbound transfer to the paint shop is planned for 06/15.',
-  "Today's production achievement is 92% against a 100% target. Steel cutting is ahead of plan (+2.1%), while block assembly is trailing by 1.4 days due to crane contention.",
-  'Goliath Crane GC-101 shows an emergency stop event at 16:40. Diagnostics indicate a limit-switch fault; maintenance ticket WO-2841 has been auto-generated.',
-  'Weather outlook for the yard: NE wind 6 m/s, gusts to 11 m/s after 15:00. Crane operations above 40m should be rescheduled to the morning window.',
-]
+/** 사전 입력된 생산 스케줄 조정 질의에 한 번만 반환하는 가짜 응답 */
+export const FAKE_LLM_RESPONSE = `작업장별 가용 BAY, 블록 이동 가능 여부, 협력사별 투입 가능 인력 및 선후행 공정 영향을 종합적으로 검토하여 다음과 같이 생산 스케줄을 조정했습니다.
+
+1. 2579호선 501블록 대조의장 작업
+기존 외업 계획을 내업 작업으로 전환합니다.
+작업 장소는 내업 1공장 4BAY로 배정합니다.
+우천 기간 이전에 블록 이동과 작업장 세팅을 완료하여, 7월 27일부터 내업 작업을 착수할 수 있도록 계획합니다.
+기존 납기 준수를 위해 작업조 인원을 우선 배정하고, 필요 시 협력사 지원 인력을 추가 투입합니다.
+
+2. 2579호선 502블록 대조의장 작업
+기존 외업 계획을 내업 작업으로 전환합니다.
+작업 장소는 501블록과 동일한 내업 1공장 4BAY로 배정하되, 작업 간 간섭을 방지하기 위해 시간대 또는 작업구역을 분리하여 운영합니다.
+501블록의 작업 진도와 BAY 점유 현황을 고려해 순차적으로 작업을 진행하며, 납기 영향이 예상될 경우 추가 인력을 투입합니다.
+
+3. 2583호선 50A블록 PE의장 작업
+장마 기간 중 발생할 수 있는 후속 공정 지연을 방지하기 위해 PE의장 작업 완료 목표일을 7월 24일로 단축합니다.
+단축 일정 달성을 위해 잔여 작업량을 기준으로 필요 인원을 재산정하고, 핵심 작업 구간에 인력을 집중 배치합니다.
+연장근무 및 협력사 추가 투입을 반영하되, 선행 작업 완료 여부와 자재 공급 일정을 사전에 확인합니다.
+
+조정 결과
+2579호선 501블록: 내업 1공장 4BAY로 전환
+2579호선 502블록: 내업 1공장 4BAY로 전환
+2583호선 50A블록: PE의장 완료일을 7월 24일로 단축
+
+단, 내업 1공장 4BAY에 두 개 블록을 동시에 배치할 수 있는지 여부는 블록 크기와 작업 반경을 기준으로 최종 확인이 필요합니다. 동시 작업이 어려운 경우에는 501블록을 우선 배치하고, 502블록은 인접 BAY 또는 교대 작업 방식으로 조정하는 방안을 적용합니다.`
