@@ -454,6 +454,9 @@ export function useLogisticsTwinScenario() {
     const target = targetObstruction.value
     if (target) {
       updateObstructionStatus(target.id, '완료')
+      if (logisticsObstructionStore.registeredObstruction?.id === target.id) {
+        logisticsObstructionStore.clearRegisteredObstruction()
+      }
       records.value = [
         {
           id: target.id,

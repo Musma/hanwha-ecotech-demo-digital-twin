@@ -73,7 +73,8 @@ function readStoredObstruction(): DashboardRegisteredObstruction | null {
   if (typeof window === 'undefined') return null
 
   try {
-    const raw = window.localStorage.getItem(STORAGE_KEY)
+    window.localStorage.removeItem(STORAGE_KEY)
+    const raw = window.sessionStorage.getItem(STORAGE_KEY)
     return raw ? normalizeObstruction(JSON.parse(raw)) : null
   } catch {
     return null
@@ -85,11 +86,12 @@ function writeStoredObstruction(
 ) {
   if (typeof window === 'undefined') return
 
+  window.localStorage.removeItem(STORAGE_KEY)
   if (!obstruction) {
-    window.localStorage.removeItem(STORAGE_KEY)
+    window.sessionStorage.removeItem(STORAGE_KEY)
     return
   }
-  window.localStorage.setItem(STORAGE_KEY, JSON.stringify(obstruction))
+  window.sessionStorage.setItem(STORAGE_KEY, JSON.stringify(obstruction))
 }
 
 export const useLogisticsObstructionStore = defineStore(
