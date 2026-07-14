@@ -9,7 +9,17 @@ const emit = defineEmits<{
 
 const { messages, isThinking, ask } = useLlmChat()
 
-const draft = ref('')
+const PRESET_SCHEDULE_QUERY = `다음주 7/27일부터 8/2일까지 장마가 예정되어 있어.
+
+그에 따라, 외업으로 계획된 블록 일부를 내업으로 돌리고,
+불가피할 경우에는 인력을 더 투입해서 납기 일자에 맞추려고해.
+
+아래 3개 작업이 조정된 스케줄을 수립해줘.
+- 2579호선 501블록 대조의장 작업을 내업 작업으로 전환
+- 2579호선 502블록 대조의장 작업을 내업 작업으로 전환
+- 2583호선 50A블록 PE의장 작업 완료일을 단축`
+
+const draft = ref(PRESET_SCHEDULE_QUERY)
 const messageListEl = ref<HTMLElement | null>(null)
 
 const submit = () => {
@@ -66,13 +76,12 @@ watch(
       </div>
 
       <div class="chat-input-area">
-        <input
+        <textarea
           v-model="draft"
           class="chat-input"
-          type="text"
           placeholder="Ask me anything . . ."
-          @keydown.enter="submit"
-        />
+          @keydown.enter.prevent="submit"
+        ></textarea>
         <button class="ask-button" type="button" @click="submit">Ask</button>
       </div>
     </div>
@@ -241,11 +250,13 @@ watch(
 }
 
 .chat-input {
-  height: 44px;
-  padding: 0 14px;
+  height: 190px;
+  padding: 12px 14px;
   font-family: 'Noto Sans KR', sans-serif;
   font-size: 13px;
+  line-height: 1.5;
   color: #ffffff;
+  resize: none;
   background: rgba(0, 0, 0, 0.3);
   border: 1px solid #ed7100;
   border-radius: 8px;
