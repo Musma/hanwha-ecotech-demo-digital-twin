@@ -58,7 +58,8 @@ function moveToDashboardRoute() {
 
   const dashboardUrl = new URL(import.meta.env.BASE_URL, window.location.origin)
   dashboardUrl.hash = '/dashboard'
-  window.location.assign(dashboardUrl.toString())
+  const targetWindow = window.parent === window ? window : window.parent
+  targetWindow.location.assign(dashboardUrl.toString())
 }
 
 function createObstructionFromRegistered(

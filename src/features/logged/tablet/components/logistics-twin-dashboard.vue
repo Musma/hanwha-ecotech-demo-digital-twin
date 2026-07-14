@@ -11,6 +11,16 @@ import LoggedPageShell from '@/shared/components/logged-page-shell.vue'
 const { jibunPolygons } = useDashboardMapState()
 const { currentDate, currentTime } = useTabletClock()
 const tabletBackgroundImage = `url(${import.meta.env.BASE_URL}login.webp)`
+
+function moveToDashboardRoute() {
+  if (typeof window === 'undefined') return
+
+  const dashboardUrl = new URL(import.meta.env.BASE_URL, window.location.origin)
+  dashboardUrl.hash = '/dashboard'
+  const targetWindow = window.parent === window ? window : window.parent
+  targetWindow.location.assign(dashboardUrl.toString())
+}
+
 const {
   closeObstructionInfo,
   completeRecord,
@@ -56,16 +66,26 @@ const {
             class="absolute inset-6 overflow-hidden rounded-2xl border border-hw-gray-dark bg-hw-white-lighter text-hw-text-primary"
           >
             <div
-              class="flex h-11 items-center justify-between bg-hw-gray-darker px-4 text-c1 font-semibold text-hw-white-main"
+              class="flex h-11 items-center justify-between gap-3 bg-hw-gray-darker px-4 text-c1 font-semibold text-hw-white-main"
             >
-              <span>
+              <span class="min-w-0 truncate">
                 <i class="ti ti-device-tablet mr-1" aria-hidden="true" />
                 에코텍 물류 · 현장 태블릿 PC
               </span>
-              <span>
-                <i class="ti ti-wifi mr-1" aria-hidden="true" />
-                {{ currentTime }}
-              </span>
+              <div class="flex shrink-0 items-center gap-3">
+                <button
+                  type="button"
+                  class="flex h-8 items-center gap-1.5 rounded-md border border-hw-white-main/20 bg-hw-white-main/10 px-3 text-c1 font-bold text-hw-white-main transition-colors hover:bg-hw-white-main/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-hw-white-main"
+                  @click="moveToDashboardRoute"
+                >
+                  <i class="ti ti-layout-dashboard" aria-hidden="true" />
+                  디지털 트윈
+                </button>
+                <span>
+                  <i class="ti ti-wifi mr-1" aria-hidden="true" />
+                  {{ currentTime }}
+                </span>
+              </div>
             </div>
 
             <div class="relative h-[calc(100%-44px)] overflow-hidden">
