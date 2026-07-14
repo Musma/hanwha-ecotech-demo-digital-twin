@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, nextTick, ref, watch } from 'vue'
+import { computed, nextTick, shallowRef, useTemplateRef, watch } from 'vue'
 
 import { useLlmChat } from '@/features/logged/dashboard/composables/use-llm-chat'
 
@@ -8,7 +8,7 @@ const emit = defineEmits<{
   'open-process-twin': []
 }>()
 
-const { messages, isThinking, ask } = useLlmChat()
+const { messages, isThinking, isTyping, ask } = useLlmChat()
 
 const PRESET_SCHEDULE_QUERY = `다음주 7/27일부터 8/2일까지 장마가 예정되어 있어.
 
@@ -20,8 +20,8 @@ const PRESET_SCHEDULE_QUERY = `다음주 7/27일부터 8/2일까지 장마가 �
 - 2579호선 502블록 대조의장 작업을 내업 작업으로 전환
 - 2583호선 50A블록 PE의장 작업 완료일을 단축`
 
-const draft = ref(PRESET_SCHEDULE_QUERY)
-const messageListEl = ref<HTMLElement | null>(null)
+const draft = shallowRef(PRESET_SCHEDULE_QUERY)
+const messageListEl = useTemplateRef<HTMLElement>('messageList')
 
 interface ResponseResult {
   target: string
@@ -78,9 +78,18 @@ const submit = () => {
 }
 
 watch(
-  () => [messages.value.length, isThinking.value],
+  () => {
+    const lastMessage = messages.value[messages.value.length - 1]
+    return [messages.value.length, lastMessage?.text.length, isThinking.value]
+  },
   async () => {
     await nextTick()
+
+    if (isTyping.value && messageListEl.value) {
+      messageListEl.value.scrollTop = messageListEl.value.scrollHeight
+      return
+    }
+
     messageListEl.value?.scrollTo({
       top: messageListEl.value.scrollHeight,
       behavior: 'smooth',
@@ -106,7 +115,7 @@ watch(
         </button>
       </div>
 
-      <div ref="messageListEl" class="chat-messages">
+      <div ref="messageList" class="chat-messages">
         <div
           v-for="message in formattedMessages"
           :key="message.id"
@@ -162,7 +171,7 @@ watch(
             </template>
             <template v-else>{{ message.text }}</template>
             <button
-              v-if="message.role === 'assistant'"
+              v-if="message.role === 'assistant' && !isTyping"
               class="confirm-button"
               type="button"
               @click="emit('open-process-twin')"

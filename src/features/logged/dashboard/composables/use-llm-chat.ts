@@ -1,10 +1,10 @@
-import { onScopeDispose, ref } from 'vue'
+import { onScopeDispose, reactive, readonly, ref, shallowRef } from 'vue'
 
 import { FAKE_LLM_RESPONSE } from '@/features/logged/dashboard/constants/llm-chat'
 import type { LlmChatMessage } from '@/features/logged/dashboard/types/llm-chat'
 
-const LLM_RESPONSE_DELAY_MS = 6900
-const LLM_RESPONSE_DELAY_JITTER_MS = 900
+const LLM_RESPONSE_DELAY_MS = 3000
+const LLM_TYPING_INTERVAL_MS = 30
 
 const formatTime = (date: Date) => {
   const hours = String(date.getHours()).padStart(2, '0')
@@ -18,11 +18,35 @@ const formatTime = (date: Date) => {
  */
 export const useLlmChat = () => {
   const messages = ref<LlmChatMessage[]>([])
-  const isThinking = ref(false)
+  const isThinking = shallowRef(false)
+  const isTyping = shallowRef(false)
 
   let hasResponded = false
   let messageSeq = 0
   let replyTimer: ReturnType<typeof setTimeout> | null = null
+  let typingTimer: ReturnType<typeof setTimeout> | null = null
+
+  const typeResponse = (message: LlmChatMessage) => {
+    const characters = Array.from(FAKE_LLM_RESPONSE)
+    let characterIndex = 0
+
+    isTyping.value = true
+
+    const typeNextCharacter = () => {
+      message.text += characters[characterIndex]
+      characterIndex += 1
+
+      if (characterIndex >= characters.length) {
+        typingTimer = null
+        isTyping.value = false
+        return
+      }
+
+      typingTimer = setTimeout(typeNextCharacter, LLM_TYPING_INTERVAL_MS)
+    }
+
+    typeNextCharacter()
+  }
 
   const ask = (question: string) => {
     const text = question.trim()
@@ -37,25 +61,33 @@ export const useLlmChat = () => {
     })
 
     isThinking.value = true
-    replyTimer = setTimeout(
-      () => {
-        messageSeq += 1
-        messages.value.push({
-          id: `assistant-${messageSeq}`,
-          role: 'assistant',
-          text: FAKE_LLM_RESPONSE,
-          time: formatTime(new Date()),
-        })
-        hasResponded = true
-        isThinking.value = false
-      },
-      LLM_RESPONSE_DELAY_MS + Math.random() * LLM_RESPONSE_DELAY_JITTER_MS,
-    )
+    replyTimer = setTimeout(() => {
+      replyTimer = null
+      messageSeq += 1
+
+      const assistantMessage = reactive<LlmChatMessage>({
+        id: `assistant-${messageSeq}`,
+        role: 'assistant',
+        text: '',
+        time: formatTime(new Date()),
+      })
+
+      messages.value.push(assistantMessage)
+      hasResponded = true
+      isThinking.value = false
+      typeResponse(assistantMessage)
+    }, LLM_RESPONSE_DELAY_MS)
   }
 
   onScopeDispose(() => {
     if (replyTimer !== null) clearTimeout(replyTimer)
+    if (typingTimer !== null) clearTimeout(typingTimer)
   })
 
-  return { messages, isThinking, ask }
+  return {
+    messages: readonly(messages),
+    isThinking: readonly(isThinking),
+    isTyping: readonly(isTyping),
+    ask,
+  }
 }
