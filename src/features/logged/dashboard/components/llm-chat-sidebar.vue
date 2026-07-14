@@ -182,12 +182,13 @@ watch(
       </div>
 
       <div class="chat-input-area">
-        <textarea
+        <input
           v-model="draft"
           class="chat-input"
+          type="text"
           placeholder="Ask me anything . . ."
           @keydown.enter.prevent="submit"
-        ></textarea>
+        />
         <button class="ask-button" type="button" @click="submit">Ask</button>
       </div>
     </div>
@@ -536,21 +537,21 @@ watch(
 
 .chat-input-area {
   display: flex;
-  flex-direction: column;
   flex-shrink: 0;
   gap: 10px;
+  align-items: center;
   padding: 12px;
   border-top: 1px solid #333333;
 }
 
 .chat-input {
-  height: 190px;
-  padding: 12px 14px;
+  flex: 1;
+  min-width: 0;
+  height: 42px;
+  padding: 0 14px;
   font-family: 'Noto Sans KR', sans-serif;
   font-size: 13px;
-  line-height: 1.5;
   color: #ffffff;
-  resize: none;
   background: rgba(0, 0, 0, 0.3);
   border: 1px solid #ed7100;
   border-radius: 8px;
@@ -561,7 +562,9 @@ watch(
 }
 
 .ask-button {
-  height: 40px;
+  flex-shrink: 0;
+  width: 72px;
+  height: 42px;
   font-family: 'Noto Sans KR', sans-serif;
   font-size: 15px;
   font-weight: 700;
