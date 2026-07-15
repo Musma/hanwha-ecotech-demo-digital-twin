@@ -10,7 +10,7 @@ import { useTabletClock } from '@/features/logged/tablet/composables/use-tablet-
 import { DASHBOARD_DEFAULT_MAP_STYLE } from '@/features/logged/tablet/constants/dashboard-map-overlay'
 import LoggedPageShell from '@/shared/components/logged-page-shell.vue'
 
-const { jibunPolygons } = useDashboardMapState()
+const { jibunPolygons, roadPolygons } = useDashboardMapState()
 const { currentDate, currentTime } = useTabletClock()
 const tabletBackgroundImage = `url(${import.meta.env.BASE_URL}login.webp)`
 const jibunLayerVisible = ref(true)
@@ -142,6 +142,7 @@ const visibleMapMarkers = computed(() =>
                 :grid-visible="true"
                 :map-style="DASHBOARD_DEFAULT_MAP_STYLE"
                 :polygons="visibleJibunPolygons"
+                :road-polygons="roadPolygons"
                 :map-markers="visibleMapMarkers"
                 :track-coordinates="trackCoordinates"
                 :track-animated="dispatchConfirmed"

@@ -70,6 +70,7 @@ interface Props {
   mapStyle: string
   mapMarkers?: MapEntityMarkerItem[]
   polygons?: YardMapProps['polygons']
+  roadPolygons?: YardMapProps['roadPolygons']
   /** 실시간 현재 위치(WGS84). null이면 마커를 표시하지 않는다. */
   livePosition?: LivePosition | null
   /** 작업 종료 후 보정된 트랙 좌표([lng, lat]). 비어 있으면 궤적선을 표시하지 않는다. */
@@ -88,6 +89,7 @@ const props = withDefaults(defineProps<Props>(), {
   gridVisible: false,
   mapMarkers: () => [],
   polygons: () => [],
+  roadPolygons: () => [],
   livePosition: null,
   trackCoordinates: () => [],
   trackAnimated: false,
@@ -132,6 +134,9 @@ const YARD_GRID_LAYER_ID = 'dashboard-yard-grid'
 const JIBUN_POLYGON_SOURCE_ID = 'dashboard-jibun-polygons'
 const JIBUN_POLYGON_FILL_LAYER_ID = 'dashboard-jibun-polygon-fill'
 const JIBUN_POLYGON_LINE_LAYER_ID = 'dashboard-jibun-polygon-line'
+const ROAD_JIBUN_SOURCE_ID = 'dashboard-road-jibun-polygons'
+const ROAD_JIBUN_FILL_LAYER_ID = 'dashboard-road-jibun-polygon-fill'
+const ROAD_JIBUN_LINE_LAYER_ID = 'dashboard-road-jibun-polygon-line'
 const ROAD_POLYGON_DRAW_SOURCE_ID = 'dashboard-road-polygon-draw'
 const ROAD_POLYGON_DRAW_FILL_LAYER_ID = 'dashboard-road-polygon-draw-fill'
 const ROAD_POLYGON_DRAW_LINE_LAYER_ID = 'dashboard-road-polygon-draw-line'
@@ -386,6 +391,77 @@ function createPolygonFeatureCollection(): DashboardGeoJsonFeatureCollection {
     type: 'FeatureCollection',
     features,
   }
+}
+
+function createRoadJibunFeatureCollection(): DashboardGeoJsonFeatureCollection {
+  const features: DashboardGeoJsonFeatureCollection['features'] = []
+
+  for (const polygon of props.roadPolygons) {
+    if (polygon.points.length < 3) continue
+    const coordinates = polygon.points.map((point) => [point.lng, point.lat])
+    coordinates.push(coordinates[0])
+    features.push({
+      type: 'Feature',
+      geometry: {
+        type: 'Polygon',
+        coordinates: [coordinates],
+      },
+      properties: {
+        id: polygon.id,
+        name: polygon.name ?? '',
+      },
+    })
+  }
+
+  return {
+    type: 'FeatureCollection',
+    features,
+  }
+}
+
+function ensureRoadJibunLayers() {
+  const map = mapRef.value
+  if (!map || !mapLoaded.value) return
+
+  if (!map.getSource(ROAD_JIBUN_SOURCE_ID)) {
+    map.addSource(ROAD_JIBUN_SOURCE_ID, {
+      type: 'geojson',
+      data: createEmptyFeatureCollection(),
+    })
+  }
+  if (!map.getLayer(ROAD_JIBUN_FILL_LAYER_ID)) {
+    map.addLayer({
+      id: ROAD_JIBUN_FILL_LAYER_ID,
+      type: 'fill',
+      source: ROAD_JIBUN_SOURCE_ID,
+      paint: {
+        'fill-color': '#111111',
+        'fill-opacity': 0.34,
+      },
+    })
+  }
+  if (!map.getLayer(ROAD_JIBUN_LINE_LAYER_ID)) {
+    map.addLayer({
+      id: ROAD_JIBUN_LINE_LAYER_ID,
+      type: 'line',
+      source: ROAD_JIBUN_SOURCE_ID,
+      paint: {
+        'line-color': '#111111',
+        'line-opacity': 0.72,
+        'line-width': 1.8,
+      },
+    })
+  }
+}
+
+function updateRoadJibunLayers() {
+  const map = mapRef.value
+  if (!map || !mapLoaded.value) return
+
+  ensureRoadJibunLayers()
+  ;(map.getSource(ROAD_JIBUN_SOURCE_ID) as GeoJSONSource | undefined)?.setData(
+    createRoadJibunFeatureCollection(),
+  )
 }
 
 function createRoadPolygonDrawFeatureCollection(): DashboardGeoJsonFeatureCollection {
@@ -1028,6 +1104,7 @@ function initializeMap() {
     ensureDashboardGridLayer()
     updateGridVisibility()
     updateJibunLayers()
+    updateRoadJibunLayers()
     updateMarkers()
     focusSelectedMarker()
     updateLiveMarker()
@@ -1055,6 +1132,7 @@ function syncMapStyle() {
     ensureDashboardGridLayer()
     updateGridVisibility()
     updateJibunLayers()
+    updateRoadJibunLayers()
     updateMarkers()
     focusSelectedMarker()
     updateLiveMarker()
@@ -1078,6 +1156,12 @@ watch(
 watch(
   () => props.polygons,
   () => updateJibunLayers(),
+  { deep: true },
+)
+
+watch(
+  () => props.roadPolygons,
+  () => updateRoadJibunLayers(),
   { deep: true },
 )
 
