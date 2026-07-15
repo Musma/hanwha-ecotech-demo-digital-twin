@@ -24,6 +24,7 @@ const routes: RouteRecordRaw[] = [
   {
     path: '/dashboard/safety-alert',
     name: 'dashboard-safety-alert',
+    alias: '/safety-alert',
     component: dashboardPage,
     meta: { dashboardModal: safetyAlertDashboardModal },
   },
