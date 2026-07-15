@@ -21,6 +21,7 @@ export interface YardJibunPolygonSource {
 
 interface YardJibunLayoutItem {
   id: number
+  parent?: number | null
   displayPrefix: string
   displayKind: string
   suffixNumber: number
@@ -33,6 +34,7 @@ interface YardJibunLayoutItem {
 
 const JIBUN_SUFFIX_PATTERN = /^(.*-)([A-Za-z]+)(\d+)$/
 const SAME_ROW_OVERLAP_RATIO = 0.35
+const ORIGINAL_ORDER_YARD_ABBRS = new Set(['2Y'])
 
 export function cloneYardGridBoundaryCoordinates(): number[][] {
   if (
@@ -81,6 +83,7 @@ function createLayoutItem(
 
   return {
     id: jibun.id,
+    parent: jibun.parent,
     displayPrefix,
     displayKind,
     suffixNumber: Number(suffix),
@@ -131,6 +134,18 @@ function isMixedJibunLayout(rows: YardJibunLayoutItem[][]): boolean {
   return rows.length > 1 && rows.some((row) => row.length > 1)
 }
 
+function shouldKeepOriginalOrder(
+  items: YardJibunLayoutItem[],
+  jibunById: Map<number, YardJibunPolygonSource>,
+): boolean {
+  const parentId = items[0]?.parent
+  if (parentId == null) return false
+
+  const parent = jibunById.get(parentId)
+  const yard = parent?.parent == null ? null : jibunById.get(parent.parent)
+  return ORIGINAL_ORDER_YARD_ABBRS.has(yard?.abbr ?? '')
+}
+
 function sortJibunLayoutItems(
   rows: YardJibunLayoutItem[][],
   direction: 'ascending' | 'descending',
@@ -147,6 +162,7 @@ function sortJibunLayoutItems(
 function createDisplayNameById(
   jibuns: YardJibunPolygonSource[],
 ): Map<number, string> {
+  const jibunById = new Map(jibuns.map((jibun) => [jibun.id, jibun]))
   const groups = new Map<string, YardJibunLayoutItem[]>()
 
   for (const jibun of jibuns) {
@@ -166,6 +182,7 @@ function createDisplayNameById(
 
   for (const items of groups.values()) {
     if (items.length < 2) continue
+    if (shouldKeepOriginalOrder(items, jibunById)) continue
 
     const rows = createJibunLayoutRows(items)
     const mixedLayout = isMixedJibunLayout(rows)
