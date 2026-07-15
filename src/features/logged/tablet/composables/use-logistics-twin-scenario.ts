@@ -57,12 +57,17 @@ function compactRouteCoordinates(coordinates: Array<[number, number]>) {
 
 function shouldMoveDispatchResource({
   resource,
-  selectedResourceCount,
+  selectedResources,
 }: {
   resource: LogisticsTwinDispatchResource
-  selectedResourceCount: number
+  selectedResources: LogisticsTwinDispatchResource[]
 }) {
-  return selectedResourceCount === 1 || resource.group === TRANSPORTER_GROUP
+  const hasTransporter = selectedResources.some(
+    (selectedResource) => selectedResource.group === TRANSPORTER_GROUP,
+  )
+
+  if (!hasTransporter) return true
+  return selectedResources.length === 1 || resource.group === TRANSPORTER_GROUP
 }
 
 function moveToDashboardRoute() {
@@ -232,7 +237,7 @@ export function useLogisticsTwinScenario() {
             dispatchConfirmed.value &&
             shouldMoveDispatchResource({
               resource,
-              selectedResourceCount: selectedDispatchResources.length,
+              selectedResources: selectedDispatchResources,
             })
           const shouldOffsetVehicleMarker =
             isNewObstructionTarget &&
@@ -262,7 +267,14 @@ export function useLogisticsTwinScenario() {
                 ] as [number, number])
               : undefined,
             tone: 'vehicle',
-            updatesTrack: movesAlongRoute,
+            updatesTrack:
+              movesAlongRoute &&
+              selectedDispatchResources.findIndex((selectedResource) =>
+                shouldMoveDispatchResource({
+                  resource: selectedResource,
+                  selectedResources: selectedDispatchResources,
+                }),
+              ) === index,
             motion: movesAlongRoute
               ? {
                   stop: target.lngLat,
@@ -302,7 +314,7 @@ export function useLogisticsTwinScenario() {
       (resource) =>
         shouldMoveDispatchResource({
           resource,
-          selectedResourceCount: selectedDispatchResources.length,
+          selectedResources: selectedDispatchResources,
         }),
     )
     const routeStart =

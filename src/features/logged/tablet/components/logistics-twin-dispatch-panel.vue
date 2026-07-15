@@ -93,7 +93,12 @@ const destination = computed(() =>
               >
                 <i class="ti ti-check text-c1" />
               </span>
-              <i class="ti ti-truck text-h5 text-hw-gray-dark" />
+              <i
+                class="text-h5 text-hw-gray-dark"
+                :class="
+                  resource.group === '지게차' ? 'ti ti-forklift' : 'ti ti-truck'
+                "
+              />
               <span class="min-w-0 flex-1">
                 <b class="block truncate text-s2 text-hw-text-primary">
                   {{ resource.code }}

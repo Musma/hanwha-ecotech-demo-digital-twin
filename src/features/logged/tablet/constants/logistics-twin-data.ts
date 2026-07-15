@@ -224,17 +224,24 @@ export function getLogisticsTwinDestination(
 export const LOGISTICS_TWIN_DISPATCH_RESOURCES: LogisticsTwinDispatchResource[] =
   [
     {
-      code: 'TR-07',
-      group: '트랜스포터',
-      ton: '120T',
-      driver: '김신호',
-      status: '대기',
-    },
-    {
       code: 'FL-12',
       group: '지게차',
       ton: '16T',
       driver: '박운행',
+      status: '대기',
+    },
+    {
+      code: 'FL-15',
+      group: '지게차',
+      ton: '16T',
+      driver: '최운송',
+      status: '대기',
+    },
+    {
+      code: 'FL-18',
+      group: '지게차',
+      ton: '16T',
+      driver: '정하역',
       status: '대기',
     },
   ]
