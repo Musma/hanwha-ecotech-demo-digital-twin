@@ -100,6 +100,7 @@ const {
                 :track-animated="dispatchConfirmed"
                 :view-reset-request="mapViewResetRequest"
                 :pick-mode="currentStep === 3"
+                :road-polygon-tool-visible="currentStep !== 1"
                 @close-marker-info="closeObstructionInfo"
                 @pick-location="pickRegisterLocation"
                 @select-marker="selectObstructionById"
