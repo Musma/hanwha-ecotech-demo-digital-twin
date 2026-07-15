@@ -234,6 +234,11 @@ export function useLogisticsTwinScenario() {
               resource,
               selectedResourceCount: selectedDispatchResources.length,
             })
+          const shouldOffsetVehicleMarker =
+            isNewObstructionTarget &&
+            !isTransporter &&
+            selectedDispatchResources.length > 1 &&
+            !movesAlongRoute
           const waitingPosition = getDispatchVehicleWaitingPosition({
             destination,
             index,
@@ -248,15 +253,14 @@ export function useLogisticsTwinScenario() {
             iconClass:
               resource.group === '지게차' ? 'ti ti-forklift' : 'ti ti-truck',
             phys: waitingPosition,
-            offset:
-              isNewObstructionTarget && !isTransporter
-                ? ([
-                    index % 2 === 0
-                      ? -NEW_OBSTRUCTION_VEHICLE_MARKER_OFFSET_X
-                      : NEW_OBSTRUCTION_VEHICLE_MARKER_OFFSET_X,
-                    NEW_OBSTRUCTION_VEHICLE_MARKER_OFFSET_Y,
-                  ] as [number, number])
-                : undefined,
+            offset: shouldOffsetVehicleMarker
+              ? ([
+                  index % 2 === 0
+                    ? -NEW_OBSTRUCTION_VEHICLE_MARKER_OFFSET_X
+                    : NEW_OBSTRUCTION_VEHICLE_MARKER_OFFSET_X,
+                  NEW_OBSTRUCTION_VEHICLE_MARKER_OFFSET_Y,
+                ] as [number, number])
+              : undefined,
             tone: 'vehicle',
             updatesTrack: movesAlongRoute,
             motion: movesAlongRoute
