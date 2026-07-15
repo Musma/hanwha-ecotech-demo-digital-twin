@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { computed, ref, watch } from 'vue'
 
 import type {
   LogisticsTwinPendingLocation,
@@ -7,7 +7,8 @@ import type {
 } from '@/features/logged/tablet/constants/logistics-twin-data'
 
 const props = defineProps<{
-  pendingLocation: LogisticsTwinPendingLocation | null
+  pendingDestinationLocation: LogisticsTwinPendingLocation | null
+  pendingStartLocation: LogisticsTwinPendingLocation | null
 }>()
 
 const emit = defineEmits<{
@@ -33,9 +34,28 @@ const photoError = ref('')
 
 const SUPPORTED_PHOTO_TYPES = new Set(['image/jpeg', 'image/png'])
 const SUPPORTED_PHOTO_NAME_PATTERN = /\.(jpe?g|png)$/i
+const isRouteSelected = computed(() =>
+  Boolean(props.pendingStartLocation && props.pendingDestinationLocation),
+)
+const routeStatusTitle = computed(() => {
+  if (isRouteSelected.value) return '출발/도착지 선택 완료'
+  return props.pendingStartLocation ? '도착지 선택' : '출발지 선택'
+})
+const routeStatusDescription = computed(() => {
+  if (isRouteSelected.value) {
+    return `${props.pendingStartLocation?.label} → ${props.pendingDestinationLocation?.label}`
+  }
+
+  return props.pendingStartLocation
+    ? '두 번째 클릭으로 도착지를 선택하십시오'
+    : '첫 번째 클릭으로 출발지를 선택하십시오'
+})
 
 watch(
-  () => props.pendingLocation?.label,
+  () => [
+    props.pendingStartLocation?.label,
+    props.pendingDestinationLocation?.label,
+  ],
   () => {
     obstructionName.value = DEFAULT_OBSTRUCTION_NAME
     obstructionKind.value = DEFAULT_OBSTRUCTION_KIND
@@ -95,7 +115,7 @@ function submitObstruction() {
         aria-live="polite"
         class="flex w-full items-center gap-2 rounded-md border px-3 py-2 text-left transition-colors"
         :class="
-          pendingLocation
+          isRouteSelected
             ? 'border-hw-orange-main bg-hw-orange-main/10'
             : 'border-hw-gray-lighter bg-hw-white-main'
         "
@@ -103,20 +123,45 @@ function submitObstruction() {
         <i class="ti ti-click text-h5 text-hw-orange-main" />
         <span class="min-w-0">
           <b class="block text-s2 text-hw-text-primary">
-            {{
-              pendingLocation
-                ? `선택 위치(물리지번) ${pendingLocation.label}`
-                : '지도에서 위치 선택'
-            }}
+            {{ routeStatusTitle }}
           </b>
           <span class="block text-c1 text-hw-gray-dark">
-            {{
-              pendingLocation
-                ? '신규 간섭물 등재 위치가 선택되었습니다'
-                : '오른쪽 지도에서 간섭물이 위치한 지번을 클릭하십시오'
-            }}
+            {{ routeStatusDescription }}
           </span>
         </span>
+      </div>
+
+      <div class="grid grid-cols-2 gap-2">
+        <div
+          class="rounded-md border p-2"
+          :class="
+            pendingStartLocation
+              ? 'border-hw-orange-main bg-hw-orange-lighter/20'
+              : 'border-hw-gray-lighter bg-hw-white-lighter'
+          "
+        >
+          <b class="block text-c1 text-hw-gray-dark">1. 출발지</b>
+          <span
+            class="mt-1 block truncate text-s2 font-bold text-hw-text-primary"
+          >
+            {{ pendingStartLocation?.label ?? '첫 번째 클릭' }}
+          </span>
+        </div>
+        <div
+          class="rounded-md border p-2"
+          :class="
+            pendingDestinationLocation
+              ? 'border-hw-orange-main bg-hw-orange-lighter/20'
+              : 'border-hw-gray-lighter bg-hw-white-lighter'
+          "
+        >
+          <b class="block text-c1 text-hw-gray-dark">2. 도착지</b>
+          <span
+            class="mt-1 block truncate text-s2 font-bold text-hw-text-primary"
+          >
+            {{ pendingDestinationLocation?.label ?? '두 번째 클릭' }}
+          </span>
+        </div>
       </div>
 
       <div
@@ -153,7 +198,7 @@ function submitObstruction() {
         </div>
       </div>
       <div
-        v-else-if="pendingLocation"
+        v-else-if="isRouteSelected"
         class="relative flex w-full cursor-pointer flex-col items-center gap-1 rounded-md border border-dashed border-hw-gray-lighter bg-hw-white-lighter p-4 text-center text-hw-gray-dark transition-colors hover:border-hw-orange-main hover:bg-hw-orange-lighter/20"
       >
         <input
@@ -181,7 +226,7 @@ function submitObstruction() {
         <i class="ti ti-camera-plus text-h3 text-hw-gray-main" />
         <span class="text-s2 font-semibold">현장 사진 업로드</span>
         <small id="logistics-twin-photo-help" class="text-c1">
-          먼저 지번을 선택하십시오
+          먼저 출발지와 도착지를 선택하십시오
         </small>
       </div>
       <p v-if="photoError" role="alert" class="text-c1 text-hw-red-dark">
@@ -193,7 +238,7 @@ function submitObstruction() {
           간섭물명
           <input
             v-model="obstructionName"
-            :disabled="!pendingLocation"
+            :disabled="!isRouteSelected"
             class="mt-1 w-full rounded-md border border-hw-gray-lighter bg-hw-white-main px-3 py-2 text-b3 text-hw-text-primary disabled:bg-hw-white-dark disabled:text-hw-gray-main"
           />
         </label>
@@ -201,7 +246,7 @@ function submitObstruction() {
           간섭물 종류
           <select
             v-model="obstructionKind"
-            :disabled="!pendingLocation"
+            :disabled="!isRouteSelected"
             class="mt-1 w-full rounded-md border border-hw-gray-lighter bg-hw-white-main px-3 py-2 text-b3 text-hw-text-primary disabled:bg-hw-white-dark disabled:text-hw-gray-main"
           >
             <option
@@ -217,7 +262,7 @@ function submitObstruction() {
           상세 내용
           <textarea
             v-model="obstructionDetail"
-            :disabled="!pendingLocation"
+            :disabled="!isRouteSelected"
             rows="3"
             class="mt-1 w-full resize-none rounded-md border border-hw-gray-lighter bg-hw-white-main px-3 py-2 text-b3 text-hw-text-primary disabled:bg-hw-white-dark disabled:text-hw-gray-main"
           />
@@ -235,7 +280,7 @@ function submitObstruction() {
       <button
         type="button"
         class="w-full rounded-md bg-hw-orange-main px-4 py-3 text-s2 font-bold text-hw-white-main transition-colors hover:bg-hw-orange-dark disabled:bg-hw-gray-main"
-        :disabled="!pendingLocation"
+        :disabled="!isRouteSelected"
         @click="submitObstruction"
       >
         <i class="ti ti-circle-plus mr-1" aria-hidden="true" />

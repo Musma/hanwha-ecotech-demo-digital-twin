@@ -4,6 +4,8 @@ import {
   LOGISTICS_TWIN_DISPATCH_RESOURCES,
   LOGISTICS_TWIN_NEW_OBSTRUCTION_ID,
   LOGISTICS_TWIN_OBSTRUCTIONS,
+  createLogisticsTwinDestinationFromLocation,
+  type LogisticsTwinDispatchResource,
   type LogisticsTwinObstruction,
   type LogisticsTwinPendingLocation,
   type LogisticsTwinRecord,
@@ -53,6 +55,16 @@ function compactRouteCoordinates(coordinates: Array<[number, number]>) {
   )
 }
 
+function shouldMoveDispatchResource({
+  resource,
+  selectedResourceCount,
+}: {
+  resource: LogisticsTwinDispatchResource
+  selectedResourceCount: number
+}) {
+  return selectedResourceCount === 1 || resource.group === TRANSPORTER_GROUP
+}
+
 function moveToDashboardRoute() {
   if (typeof window === 'undefined') return
 
@@ -78,6 +90,7 @@ function createObstructionFromRegistered(
     reporter: registered.reporter,
     status: '확인',
     detail: registered.detail,
+    destination: registered.destination,
     photo: registered.photo,
   }
 }
@@ -93,7 +106,11 @@ export function useLogisticsTwinScenario() {
   const targetId = shallowRef('')
   const selectedDispatchResourceCodes = shallowRef<string[]>([])
   const dispatchConfirmed = shallowRef(false)
-  const pendingLocation = shallowRef<LogisticsTwinPendingLocation | null>(null)
+  const pendingStartLocation = shallowRef<LogisticsTwinPendingLocation | null>(
+    null,
+  )
+  const pendingDestinationLocation =
+    shallowRef<LogisticsTwinPendingLocation | null>(null)
   const records = shallowRef<LogisticsTwinRecord[]>([])
   const mapViewResetRequest = shallowRef(0)
   const toastMessage = shallowRef('')
@@ -169,20 +186,34 @@ export function useLogisticsTwinScenario() {
             : 'obstruction-warn',
       }))
 
-    if (currentStep.value === 3 && pendingLocation.value) {
-      return [
-        ...obstructionMarkers,
-        {
-          id: 'pending-obstruction-location',
-          label: '신규',
-          name: `등재 위치 ${pendingLocation.value.label}`,
-          phys: pendingLocation.value.lngLat,
+    if (currentStep.value === 3) {
+      const pendingMarkers: MapEntityMarkerItem[] = []
+      if (pendingStartLocation.value) {
+        pendingMarkers.push({
+          id: 'pending-obstruction-start-location',
+          label: '출발',
+          name: `출발지 ${pendingStartLocation.value.label}`,
+          phys: pendingStartLocation.value.lngLat,
           anchor: 'center',
           selected: true,
           showWave: false,
           tone: 'obstruction-warn',
-        },
-      ]
+        })
+      }
+      if (pendingDestinationLocation.value) {
+        pendingMarkers.push({
+          id: 'pending-obstruction-destination-location',
+          label: '도착',
+          name: `도착지 ${pendingDestinationLocation.value.label}`,
+          phys: pendingDestinationLocation.value.lngLat,
+          anchor: 'center',
+          selected: true,
+          showWave: false,
+          tone: 'drop-zone',
+        })
+      }
+
+      return [...obstructionMarkers, ...pendingMarkers]
     }
 
     if (currentStep.value !== 5) return obstructionMarkers
@@ -197,6 +228,12 @@ export function useLogisticsTwinScenario() {
     const vehicleMarkers: MapEntityMarkerItem[] = target
       ? selectedDispatchResources.map((resource, index) => {
           const isTransporter = resource.group === TRANSPORTER_GROUP
+          const movesAlongRoute =
+            dispatchConfirmed.value &&
+            shouldMoveDispatchResource({
+              resource,
+              selectedResourceCount: selectedDispatchResources.length,
+            })
           const waitingPosition = getDispatchVehicleWaitingPosition({
             destination,
             index,
@@ -221,17 +258,16 @@ export function useLogisticsTwinScenario() {
                   ] as [number, number])
                 : undefined,
             tone: 'vehicle',
-            updatesTrack: isTransporter,
-            motion:
-              dispatchConfirmed.value && isTransporter
-                ? {
-                    stop: target.lngLat,
-                    destination: destination.lngLat,
-                    approachDurationMs: 1800 + index * 300,
-                    dwellDurationMs: 2000,
-                    departureDurationMs: 5000 + index * 300,
-                  }
-                : undefined,
+            updatesTrack: movesAlongRoute,
+            motion: movesAlongRoute
+              ? {
+                  stop: target.lngLat,
+                  destination: destination.lngLat,
+                  approachDurationMs: 1800 + index * 300,
+                  dwellDurationMs: 2000,
+                  departureDurationMs: 5000 + index * 300,
+                }
+              : undefined,
           }
         })
       : []
@@ -255,16 +291,21 @@ export function useLogisticsTwinScenario() {
     const destination = getLogisticsTwinDestination(target)
     const isNewObstructionTarget =
       target.id === LOGISTICS_TWIN_NEW_OBSTRUCTION_ID
-    const transporterIndex = LOGISTICS_TWIN_DISPATCH_RESOURCES.findIndex(
+    const selectedDispatchResources = LOGISTICS_TWIN_DISPATCH_RESOURCES.filter(
+      (resource) => selectedDispatchResourceCodes.value.includes(resource.code),
+    )
+    const movingResourceIndex = selectedDispatchResources.findIndex(
       (resource) =>
-        resource.group === TRANSPORTER_GROUP &&
-        selectedDispatchResourceCodes.value.includes(resource.code),
+        shouldMoveDispatchResource({
+          resource,
+          selectedResourceCount: selectedDispatchResources.length,
+        }),
     )
     const routeStart =
-      transporterIndex >= 0
+      movingResourceIndex >= 0
         ? getDispatchVehicleWaitingPosition({
             destination,
-            index: transporterIndex,
+            index: movingResourceIndex,
             isNewObstructionTarget,
             target,
           })
@@ -301,34 +342,48 @@ export function useLogisticsTwinScenario() {
   }
 
   function startRegister() {
-    pendingLocation.value = null
+    pendingStartLocation.value = null
+    pendingDestinationLocation.value = null
     markerInfoId.value = ''
     currentStep.value = 3
   }
 
   function showObstructionList() {
-    pendingLocation.value = null
+    pendingStartLocation.value = null
+    pendingDestinationLocation.value = null
     selectedId.value = ''
     markerInfoId.value = ''
     currentStep.value = 4
   }
 
   function pickRegisterLocation(location: LogisticsTwinPendingLocation) {
-    pendingLocation.value = location
+    if (!pendingStartLocation.value) {
+      pendingStartLocation.value = location
+      showToast('출발지가 선택되었습니다. 도착지를 선택해 주세요')
+      return
+    }
+
+    pendingDestinationLocation.value = location
+    showToast('도착지가 선택되었습니다. 간섭물을 등록할 수 있습니다')
   }
 
   function registerObstruction(payload: LogisticsTwinRegisterPayload) {
-    const pending = pendingLocation.value
-    if (!pending) return
+    const startLocation = pendingStartLocation.value
+    const destinationLocation = pendingDestinationLocation.value
+    if (!startLocation || !destinationLocation) return
+
+    const destination =
+      createLogisticsTwinDestinationFromLocation(destinationLocation)
 
     const newItem: LogisticsTwinObstruction = {
       id: LOGISTICS_TWIN_NEW_OBSTRUCTION_ID,
       label: 'OB51',
       name: payload.name,
       kind: payload.kind,
-      jibun: '1Y-도로-084-011',
-      phys: pending.phys,
-      lngLat: pending.lngLat,
+      jibun: startLocation.label,
+      phys: startLocation.phys,
+      lngLat: startLocation.lngLat,
+      destination,
       days: 0,
       foundAt: '2026.05.22 13:20',
       reporter: 'HSE 담당자',
@@ -345,16 +400,18 @@ export function useLogisticsTwinScenario() {
       kind: newItem.kind,
       label: newItem.label,
       lngLat: newItem.lngLat,
-      locationLabel: pending.label,
+      locationLabel: startLocation.label,
       name: newItem.name,
       photo: newItem.photo,
       phys: newItem.phys,
       reporter: newItem.reporter,
       status: newItem.status,
+      destination,
     })
     selectedId.value = newItem.id
     markerInfoId.value = newItem.id
-    pendingLocation.value = null
+    pendingStartLocation.value = null
+    pendingDestinationLocation.value = null
     currentStep.value = 4
     showToast('도로 간섭물이 등재되었습니다')
   }
@@ -413,9 +470,14 @@ export function useLogisticsTwinScenario() {
     const registered = logisticsObstructionStore.registeredObstruction
     const locationLabel =
       registered?.id === item.id ? registered.locationLabel : item.jibun
+    const destination =
+      registered?.id === item.id
+        ? (item.destination ?? registered.destination)
+        : item.destination
 
     logisticsObstructionStore.setRegisteredObstruction({
       detail: item.detail,
+      destination,
       foundAt: item.foundAt,
       id: item.id,
       kind: item.kind,
@@ -480,7 +542,8 @@ export function useLogisticsTwinScenario() {
     targetId.value = ''
     selectedDispatchResourceCodes.value = []
     dispatchConfirmed.value = false
-    pendingLocation.value = null
+    pendingStartLocation.value = null
+    pendingDestinationLocation.value = null
     currentStep.value = 4
     mapViewResetRequest.value += 1
   }
@@ -495,7 +558,8 @@ export function useLogisticsTwinScenario() {
     targetId.value = ''
     selectedDispatchResourceCodes.value = []
     dispatchConfirmed.value = false
-    pendingLocation.value = null
+    pendingStartLocation.value = null
+    pendingDestinationLocation.value = null
     records.value = []
     toastMessage.value = ''
     mapViewResetRequest.value += 1
@@ -512,7 +576,8 @@ export function useLogisticsTwinScenario() {
     mapViewResetRequest,
     mapMarkers,
     openObstructionInDashboard,
-    pendingLocation,
+    pendingDestinationLocation,
+    pendingStartLocation,
     pickRegisterLocation,
     records,
     registerObstruction,

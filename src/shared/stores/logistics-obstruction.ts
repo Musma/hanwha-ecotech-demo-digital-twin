@@ -2,8 +2,16 @@ import { defineStore } from 'pinia'
 
 const STORAGE_KEY = 'hanwha-logistics-new-obstruction'
 
+export interface DashboardRegisteredObstructionDestination {
+  label: string
+  jibun: string
+  lngLat: [number, number]
+  phys: [number, number]
+}
+
 export interface DashboardRegisteredObstruction {
   detail: string
+  destination?: DashboardRegisteredObstructionDestination
   dispatchRequestAt?: number
   foundAt: string
   id: string
@@ -28,6 +36,29 @@ function isNumberTuple(value: unknown): value is [number, number] {
   )
 }
 
+function normalizeDestination(
+  value: unknown,
+): DashboardRegisteredObstructionDestination | undefined {
+  if (!value || typeof value !== 'object') return undefined
+
+  const source = value as Partial<DashboardRegisteredObstructionDestination>
+  if (
+    typeof source.label !== 'string' ||
+    typeof source.jibun !== 'string' ||
+    !isNumberTuple(source.phys) ||
+    !isNumberTuple(source.lngLat)
+  ) {
+    return undefined
+  }
+
+  return {
+    label: source.label,
+    jibun: source.jibun,
+    lngLat: [Number(source.lngLat[0]), Number(source.lngLat[1])],
+    phys: [Number(source.phys[0]), Number(source.phys[1])],
+  }
+}
+
 function normalizeObstruction(
   value: unknown,
 ): DashboardRegisteredObstruction | null {
@@ -47,6 +78,7 @@ function normalizeObstruction(
 
   return {
     detail: source.detail,
+    destination: normalizeDestination(source.destination),
     dispatchRequestAt:
       typeof source.dispatchRequestAt === 'number'
         ? source.dispatchRequestAt

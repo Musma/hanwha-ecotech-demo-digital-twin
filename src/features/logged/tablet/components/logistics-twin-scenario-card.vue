@@ -17,7 +17,8 @@ defineProps<{
   targetObstruction: LogisticsTwinObstruction | null
   dispatchConfirmed: boolean
   selectedResourceCodes: string[]
-  pendingLocation: LogisticsTwinPendingLocation | null
+  pendingDestinationLocation: LogisticsTwinPendingLocation | null
+  pendingStartLocation: LogisticsTwinPendingLocation | null
   records: LogisticsTwinRecord[]
 }>()
 
@@ -37,7 +38,8 @@ const emit = defineEmits<{
 <template>
   <LogisticsTwinRegisterPanel
     v-if="currentStep === 3"
-    :pending-location="pendingLocation"
+    :pending-destination-location="pendingDestinationLocation"
+    :pending-start-location="pendingStartLocation"
     @register-obstruction="emit('registerObstruction', $event)"
   />
 

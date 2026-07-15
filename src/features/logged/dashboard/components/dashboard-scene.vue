@@ -105,6 +105,9 @@ const registeredObstructionRows = computed(() => {
   return [
     { label: '종류', value: obstruction.kind },
     { label: '위치', value: obstruction.locationLabel },
+    ...(obstruction.destination
+      ? [{ label: '목적지', value: obstruction.destination.jibun }]
+      : []),
     { label: '발견시기', value: obstruction.foundAt },
     { label: '상태', value: obstruction.status },
     { label: '보고자', value: obstruction.reporter },

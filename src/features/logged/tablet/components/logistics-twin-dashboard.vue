@@ -29,7 +29,8 @@ const {
   dispatchConfirmed,
   mapViewResetRequest,
   mapMarkers,
-  pendingLocation,
+  pendingDestinationLocation,
+  pendingStartLocation,
   pickRegisterLocation,
   openObstructionInDashboard,
   records,
@@ -230,7 +231,10 @@ const {
                         :target-obstruction="targetObstruction"
                         :dispatch-confirmed="dispatchConfirmed"
                         :selected-resource-codes="selectedDispatchResourceCodes"
-                        :pending-location="pendingLocation"
+                        :pending-destination-location="
+                          pendingDestinationLocation
+                        "
+                        :pending-start-location="pendingStartLocation"
                         :records="records"
                         @register-obstruction="registerObstruction"
                         @open-dashboard="openObstructionInDashboard"

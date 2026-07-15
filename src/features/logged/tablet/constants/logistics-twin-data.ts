@@ -18,6 +18,7 @@ export interface LogisticsTwinObstruction {
   jibun: string
   phys: [number, number]
   lngLat: [number, number]
+  destination?: LogisticsTwinDestinationLocation
   days: number
   foundAt: string
   reporter: string
@@ -28,6 +29,13 @@ export interface LogisticsTwinObstruction {
 
 export interface LogisticsTwinPendingLocation {
   label: string
+  phys: [number, number]
+  lngLat: [number, number]
+}
+
+export interface LogisticsTwinDestinationLocation {
+  label: string
+  jibun: string
   phys: [number, number]
   lngLat: [number, number]
 }
@@ -177,23 +185,37 @@ export const LOGISTICS_TWIN_PIN_POSITIONS: Record<
 
 export const LOGISTICS_TWIN_NEW_OBSTRUCTION_ID = 'OBS-2605-101'
 
-export const LOGISTICS_TWIN_DROP_ZONE = {
+export const LOGISTICS_TWIN_DROP_ZONE: LogisticsTwinDestinationLocation = {
   label: '목적지',
   jibun: '1Y-집하-01',
-  phys: [142, 6] as [number, number],
-  lngLat: [127.602706, 34.904926] as [number, number],
+  phys: [142, 6],
+  lngLat: [127.602706, 34.904926],
 }
 
-export const LOGISTICS_TWIN_NEW_DESTINATION = {
-  label: '목적지',
-  jibun: '(082, 022)',
-  phys: [82, 22] as [number, number],
-  lngLat: [127.5963146493744, 34.902844506915244] as [number, number],
+export const LOGISTICS_TWIN_NEW_DESTINATION: LogisticsTwinDestinationLocation =
+  {
+    label: '목적지',
+    jibun: '(082, 022)',
+    phys: [82, 22],
+    lngLat: [127.5963146493744, 34.902844506915244],
+  }
+
+export function createLogisticsTwinDestinationFromLocation(
+  location: LogisticsTwinPendingLocation,
+): LogisticsTwinDestinationLocation {
+  return {
+    label: '선택 목적지',
+    jibun: location.label,
+    phys: location.phys,
+    lngLat: location.lngLat,
+  }
 }
 
 export function getLogisticsTwinDestination(
   obstruction?: LogisticsTwinObstruction | null,
 ) {
+  if (obstruction?.destination) return obstruction.destination
+
   return obstruction?.id === LOGISTICS_TWIN_NEW_OBSTRUCTION_ID
     ? LOGISTICS_TWIN_NEW_DESTINATION
     : LOGISTICS_TWIN_DROP_ZONE
