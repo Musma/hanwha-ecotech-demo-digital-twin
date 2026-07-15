@@ -1,15 +1,34 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
+
+const props = withDefaults(
+  defineProps<{
+    collapseWhen?: boolean
+  }>(),
+  {
+    collapseWhen: false,
+  },
+)
 
 const emit = defineEmits<{
   'production-click': []
 }>()
 
-const isCollapsed = ref(false)
+const isCollapsed = ref(props.collapseWhen)
 
 const toggleCollapsed = () => {
   isCollapsed.value = !isCollapsed.value
 }
+
+watch(
+  () => props.collapseWhen,
+  (collapseWhen) => {
+    if (collapseWhen) {
+      isCollapsed.value = true
+    }
+  },
+  { immediate: true },
+)
 
 interface AxisMonth {
   label: string

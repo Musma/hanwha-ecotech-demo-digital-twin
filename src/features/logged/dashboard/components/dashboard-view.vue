@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 
 import AlarmPopup from '@/features/logged/dashboard/components/alarm-popup.vue'
@@ -99,6 +99,8 @@ const confirmCctvAlarm = () => {
   closeActiveModal()
 }
 
+const shouldCollapseKpiPanel = computed(() => routeModal.value === 'cctv')
+
 watch(
   () => route.fullPath,
   () => {
@@ -126,7 +128,10 @@ watch(
       @block-click="openModal('block-info')"
       @cctv-click="openModal('cctv')"
     />
-    <DashboardKpiPanel @production-click="openModal('production')" />
+    <DashboardKpiPanel
+      :collapse-when="shouldCollapseKpiPanel"
+      @production-click="openModal('production')"
+    />
     <DashboardMinimap />
     <DashboardTwinTabs
       :active-tab-id="activeTwinTabId"
