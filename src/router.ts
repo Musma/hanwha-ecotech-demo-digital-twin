@@ -4,6 +4,11 @@ import {
   type RouteRecordRaw,
 } from 'vue-router'
 
+import type { DashboardModal } from '@/features/logged/dashboard/composables/use-dashboard-overlays'
+
+const dashboardPage = () => import('@/pages/dashboard/index.vue')
+const safetyAlertDashboardModal: DashboardModal = 'cctv'
+
 const routes: RouteRecordRaw[] = [
   { path: '/', redirect: '/login' },
   {
@@ -14,7 +19,13 @@ const routes: RouteRecordRaw[] = [
   {
     path: '/dashboard',
     name: 'dashboard',
-    component: () => import('@/pages/dashboard/index.vue'),
+    component: dashboardPage,
+  },
+  {
+    path: '/dashboard/safety-alert',
+    name: 'dashboard-safety-alert',
+    component: dashboardPage,
+    meta: { dashboardModal: safetyAlertDashboardModal },
   },
   {
     path: '/tablet',

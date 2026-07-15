@@ -13,6 +13,23 @@ export type DashboardModal =
 
 export type DetailSidebarKind = 'block' | 'area'
 
+export const DASHBOARD_MODALS = [
+  'production',
+  'block-info',
+  'recording-list',
+  'recording-player',
+  'cctv',
+  'alarm',
+  'twin-process',
+  'twin-logistics',
+  'twin-equipment',
+  'twin-hse',
+] as const satisfies readonly DashboardModal[]
+
+export const isDashboardModal = (value: unknown): value is DashboardModal =>
+  typeof value === 'string' &&
+  (DASHBOARD_MODALS as readonly string[]).includes(value)
+
 /**
  * 대시보드 위에 겹쳐지는 오버레이(모달/사이드 네비게이션/상세 사이드바) 상태를 관리한다.
  * 모달은 한 번에 하나만 열리고, 사이드 네비게이션과 상세 사이드바는 모달과 독립적으로 열린다.

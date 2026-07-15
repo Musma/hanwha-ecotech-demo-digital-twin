@@ -1,4 +1,7 @@
 <script setup lang="ts">
+import { ref, watch } from 'vue'
+import { useRoute } from 'vue-router'
+
 import AlarmPopup from '@/features/logged/dashboard/components/alarm-popup.vue'
 import AreaDetailSidebar from '@/features/logged/dashboard/components/area-detail-sidebar.vue'
 import BlockDetailSidebar from '@/features/logged/dashboard/components/block-detail-sidebar.vue'
@@ -19,7 +22,13 @@ import ProductionAchievementModal from '@/features/logged/dashboard/components/p
 import RecordingListModal from '@/features/logged/dashboard/components/recording-list-modal.vue'
 import RecordingPlayerView from '@/features/logged/dashboard/components/recording-player-view.vue'
 import SideNavigation from '@/features/logged/dashboard/components/side-navigation.vue'
-import { useDashboardOverlays } from '@/features/logged/dashboard/composables/use-dashboard-overlays'
+import {
+  isDashboardModal,
+  useDashboardOverlays,
+  type DashboardModal,
+} from '@/features/logged/dashboard/composables/use-dashboard-overlays'
+
+const route = useRoute()
 
 const {
   activeModal,
@@ -37,6 +46,45 @@ const {
   closeDetailSidebar,
   openBlockDetailFromInfoModal,
 } = useDashboardOverlays()
+
+const routeModal = ref<DashboardModal | null>(null)
+
+const normalizeQueryValue = (value: unknown) =>
+  Array.isArray(value) ? value[0] : value
+
+const getRouteModal = (): DashboardModal | null => {
+  const modalQuery = normalizeQueryValue(route.query.modal)
+
+  if (isDashboardModal(modalQuery)) {
+    return modalQuery
+  }
+
+  if (isDashboardModal(route.meta.dashboardModal)) {
+    return route.meta.dashboardModal
+  }
+
+  return null
+}
+
+watch(
+  () => route.fullPath,
+  () => {
+    const previousRouteModal = routeModal.value
+    const nextRouteModal = getRouteModal()
+
+    routeModal.value = nextRouteModal
+
+    if (nextRouteModal) {
+      openModal(nextRouteModal)
+      return
+    }
+
+    if (previousRouteModal && activeModal.value === previousRouteModal) {
+      closeModal()
+    }
+  },
+  { immediate: true },
+)
 </script>
 
 <template>
