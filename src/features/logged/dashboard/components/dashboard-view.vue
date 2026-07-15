@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 
 import AlarmPopup from '@/features/logged/dashboard/components/alarm-popup.vue'
 import AreaDetailSidebar from '@/features/logged/dashboard/components/area-detail-sidebar.vue'
@@ -29,6 +29,7 @@ import {
 } from '@/features/logged/dashboard/composables/use-dashboard-overlays'
 
 const route = useRoute()
+const router = useRouter()
 
 const {
   activeModal,
@@ -64,6 +65,33 @@ const getRouteModal = (): DashboardModal | null => {
   }
 
   return null
+}
+
+const getQueryWithoutModal = () => {
+  const query = { ...route.query }
+  delete query.modal
+  return query
+}
+
+const clearRouteModalUrl = () => {
+  const query = getQueryWithoutModal()
+
+  if (route.meta.dashboardModal) {
+    return router.replace({ name: 'dashboard', query })
+  }
+
+  return router.replace({ path: route.path, query })
+}
+
+const closeActiveModal = () => {
+  const shouldClearRouteModal =
+    routeModal.value !== null && activeModal.value === routeModal.value
+
+  closeModal()
+
+  if (shouldClearRouteModal) {
+    void clearRouteModalUrl()
+  }
 }
 
 watch(
@@ -138,56 +166,59 @@ watch(
     <Transition name="modal-fade">
       <ProductionAchievementModal
         v-if="activeModal === 'production'"
-        @close="closeModal"
+        @close="closeActiveModal"
       />
     </Transition>
     <Transition name="modal-fade">
       <BlockInfoModal
         v-if="activeModal === 'block-info'"
-        @close="closeModal"
+        @close="closeActiveModal"
         @open-detail="openBlockDetailFromInfoModal"
       />
     </Transition>
     <Transition name="modal-fade">
       <RecordingListModal
         v-if="activeModal === 'recording-list'"
-        @close="closeModal"
+        @close="closeActiveModal"
         @select-recording="openModal('recording-player')"
       />
     </Transition>
     <Transition name="slide-up">
       <RecordingPlayerView
         v-if="activeModal === 'recording-player'"
-        @close="closeModal"
+        @close="closeActiveModal"
       />
     </Transition>
     <Transition name="modal-fade">
-      <CctvPopup v-if="activeModal === 'cctv'" @close="closeModal" />
+      <CctvPopup v-if="activeModal === 'cctv'" @close="closeActiveModal" />
     </Transition>
     <Transition name="modal-fade">
-      <AlarmPopup v-if="activeModal === 'alarm'" @close="closeModal" />
+      <AlarmPopup v-if="activeModal === 'alarm'" @close="closeActiveModal" />
     </Transition>
 
     <Transition name="modal-fade">
       <ProcessTwinModal
         v-if="activeModal === 'twin-process'"
-        @close="closeModal"
+        @close="closeActiveModal"
       />
     </Transition>
     <Transition name="modal-fade">
       <LogisticsTwinModal
         v-if="activeModal === 'twin-logistics'"
-        @close="closeModal"
+        @close="closeActiveModal"
       />
     </Transition>
     <Transition name="modal-fade">
       <EquipmentTwinModal
         v-if="activeModal === 'twin-equipment'"
-        @close="closeModal"
+        @close="closeActiveModal"
       />
     </Transition>
     <Transition name="modal-fade">
-      <HseTwinModal v-if="activeModal === 'twin-hse'" @close="closeModal" />
+      <HseTwinModal
+        v-if="activeModal === 'twin-hse'"
+        @close="closeActiveModal"
+      />
     </Transition>
   </div>
 </template>
