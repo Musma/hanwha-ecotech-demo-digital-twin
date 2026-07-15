@@ -1,6 +1,11 @@
 <script setup lang="ts">
+defineProps<{
+  confirmUrl: string
+}>()
+
 const emit = defineEmits<{
   close: []
+  confirm: []
 }>()
 
 interface AlarmField {
@@ -63,9 +68,15 @@ const ALARM_FIELDS: AlarmField[] = [
           <button class="history-button" type="button">
             <div class="button-text">알람 내역</div>
           </button>
-          <button class="confirm-button" type="button" @click="emit('close')">
+          <a
+            class="confirm-button"
+            :href="confirmUrl"
+            target="_blank"
+            rel="noopener noreferrer"
+            @click="emit('confirm')"
+          >
             <div class="button-text">확인</div>
-          </button>
+          </a>
         </div>
       </div>
     </div>
@@ -284,6 +295,7 @@ const ALARM_FIELDS: AlarmField[] = [
   height: 30px;
   position: relative;
   cursor: pointer;
+  text-decoration: none;
 }
 
 .button-text {

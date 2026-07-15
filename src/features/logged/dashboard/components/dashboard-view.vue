@@ -30,6 +30,7 @@ import {
 
 const route = useRoute()
 const router = useRouter()
+const safetySopUrl = 'https://musma.github.io/hanwha-ecotech-demo-HSEMVP/#/sop'
 
 const {
   activeModal,
@@ -92,6 +93,10 @@ const closeActiveModal = () => {
   if (shouldClearRouteModal) {
     void clearRouteModalUrl()
   }
+}
+
+const confirmCctvAlarm = () => {
+  closeActiveModal()
 }
 
 watch(
@@ -190,7 +195,12 @@ watch(
       />
     </Transition>
     <Transition name="modal-fade">
-      <CctvPopup v-if="activeModal === 'cctv'" @close="closeActiveModal" />
+      <CctvPopup
+        v-if="activeModal === 'cctv'"
+        :confirm-url="safetySopUrl"
+        @close="closeActiveModal"
+        @confirm="confirmCctvAlarm"
+      />
     </Transition>
     <Transition name="modal-fade">
       <AlarmPopup v-if="activeModal === 'alarm'" @close="closeActiveModal" />
