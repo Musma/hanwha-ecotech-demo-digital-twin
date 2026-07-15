@@ -23,4 +23,10 @@ export const ROAD_JIBUN_SEED: RoadJibunSource[] = [
       { row: 33, from: 2, to: 66 },
     ],
   },
+  {
+    id: 'road-002',
+    name: '도로지번 002',
+    poly: '(335.8,68.7)(639.9,68)(638.5,79.8)(335.1,81.9)',
+    cellRanges: [{ row: 7, from: 34, to: 63 }],
+  },
 ]
