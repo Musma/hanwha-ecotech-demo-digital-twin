@@ -14,9 +14,14 @@ const { jibunPolygons } = useDashboardMapState()
 const { currentDate, currentTime } = useTabletClock()
 const tabletBackgroundImage = `url(${import.meta.env.BASE_URL}login.webp)`
 const jibunLayerVisible = ref(true)
+const obstructionLayerVisible = ref(true)
 const visibleJibunPolygons = computed(() =>
   jibunLayerVisible.value ? jibunPolygons.value : [],
 )
+
+function isObstructionMapMarker(marker: { id?: string }) {
+  return typeof marker.id === 'string' && marker.id.startsWith('OBS-')
+}
 
 function moveToDashboardRoute() {
   if (typeof window === 'undefined') return
@@ -56,6 +61,12 @@ const {
   unlockTablet,
   visibleObstructions,
 } = useLogisticsTwinScenario()
+
+const visibleMapMarkers = computed(() =>
+  obstructionLayerVisible.value
+    ? mapMarkers.value
+    : mapMarkers.value.filter((marker) => !isObstructionMapMarker(marker)),
+)
 </script>
 
 <template>
@@ -65,19 +76,35 @@ const {
         <div
           class="relative aspect-[10/16] w-full max-w-sm rounded-3xl border-[10px] border-hw-gray-darker bg-hw-gray-darker shadow-2xl sm:aspect-[16/10] sm:max-w-6xl"
         >
-          <button
+          <div
             v-if="currentStep !== 1"
-            type="button"
-            class="absolute left-1/2 top-0 z-30 flex h-10 -translate-x-1/2 -translate-y-[calc(100%+12px)] items-center gap-1.5 rounded-md border border-hw-gray-lighter bg-hw-white-main px-3 text-c1 font-bold text-hw-gray-darker shadow-lg transition-colors hover:bg-hw-btn-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-hw-orange-main sm:left-auto sm:right-0 sm:top-16 sm:translate-x-[calc(100%+12px)] sm:translate-y-0"
-            :aria-pressed="!jibunLayerVisible"
-            @click="jibunLayerVisible = !jibunLayerVisible"
+            class="absolute left-1/2 top-0 z-30 flex -translate-x-1/2 -translate-y-[calc(100%+12px)] gap-2 sm:left-auto sm:right-0 sm:top-16 sm:translate-x-[calc(100%+12px)] sm:translate-y-0 sm:flex-col"
           >
-            <i
-              :class="jibunLayerVisible ? 'ti ti-eye-off' : 'ti ti-eye'"
-              aria-hidden="true"
-            />
-            {{ jibunLayerVisible ? '지번 숨김' : '지번 표시' }}
-          </button>
+            <button
+              type="button"
+              class="flex h-10 items-center gap-1.5 rounded-md border border-hw-gray-lighter bg-hw-white-main px-3 text-c1 font-bold text-hw-gray-darker shadow-lg transition-colors hover:bg-hw-btn-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-hw-orange-main"
+              :aria-pressed="!jibunLayerVisible"
+              @click="jibunLayerVisible = !jibunLayerVisible"
+            >
+              <i
+                :class="jibunLayerVisible ? 'ti ti-eye-off' : 'ti ti-eye'"
+                aria-hidden="true"
+              />
+              {{ jibunLayerVisible ? '지번 숨김' : '지번 표시' }}
+            </button>
+            <button
+              type="button"
+              class="flex h-10 items-center gap-1.5 rounded-md border border-hw-gray-lighter bg-hw-white-main px-3 text-c1 font-bold text-hw-gray-darker shadow-lg transition-colors hover:bg-hw-btn-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-hw-orange-main"
+              :aria-pressed="!obstructionLayerVisible"
+              @click="obstructionLayerVisible = !obstructionLayerVisible"
+            >
+              <i
+                :class="obstructionLayerVisible ? 'ti ti-eye-off' : 'ti ti-eye'"
+                aria-hidden="true"
+              />
+              {{ obstructionLayerVisible ? '간섭물 숨김' : '간섭물 표시' }}
+            </button>
+          </div>
 
           <span
             class="absolute left-1/2 top-2 z-10 h-1.5 w-24 -translate-x-1/2 rounded-full bg-hw-gray-main"
@@ -115,7 +142,7 @@ const {
                 :grid-visible="true"
                 :map-style="DASHBOARD_DEFAULT_MAP_STYLE"
                 :polygons="visibleJibunPolygons"
-                :map-markers="mapMarkers"
+                :map-markers="visibleMapMarkers"
                 :track-coordinates="trackCoordinates"
                 :track-animated="dispatchConfirmed"
                 :view-reset-request="mapViewResetRequest"
