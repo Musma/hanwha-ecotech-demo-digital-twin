@@ -550,8 +550,13 @@ function updateWorkTrackFromVehicle(
   const map = mapRef.value
   if (!map || !mapLoaded.value || !motion) return
 
-  const coordinates =
-    phase === 'approach' || phase === 'dwell'
+  const motionRouteCoordinates =
+    motion.routeCoordinates && motion.routeCoordinates.length >= 2
+      ? motion.routeCoordinates
+      : null
+  const coordinates = motionRouteCoordinates
+    ? compactTrackCoordinates(motionRouteCoordinates)
+    : phase === 'approach' || phase === 'dwell'
       ? compactTrackCoordinates([position, motion.stop, motion.destination])
       : compactTrackCoordinates([position, motion.destination])
 

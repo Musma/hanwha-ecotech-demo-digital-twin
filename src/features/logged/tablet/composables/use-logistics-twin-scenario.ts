@@ -14,6 +14,7 @@ import {
   getLogisticsTwinTone,
   getLogisticsTwinToneLabel,
 } from '@/features/logged/tablet/constants/logistics-twin-data'
+import { createOptimalRoadJibunRoute } from '@/features/logged/tablet/utils/road-jibun-routing'
 import {
   type DashboardRegisteredObstruction,
   useLogisticsObstructionStore,
@@ -28,6 +29,24 @@ function getDispatchVehicleStartPosition(
   target: LogisticsTwinObstruction,
 ): [number, number] {
   return target.lngLat
+}
+
+function getDispatchRouteCoordinates(
+  target: LogisticsTwinObstruction,
+  destination: { lngLat: [number, number]; phys: [number, number] },
+) {
+  if (target.id !== LOGISTICS_TWIN_NEW_OBSTRUCTION_ID) {
+    return compactRouteCoordinates([target.lngLat, destination.lngLat])
+  }
+
+  return (
+    createOptimalRoadJibunRoute({
+      destinationLngLat: destination.lngLat,
+      destinationPhys: destination.phys,
+      startLngLat: target.lngLat,
+      startPhys: target.phys,
+    }) ?? compactRouteCoordinates([target.lngLat, destination.lngLat])
+  )
 }
 
 function isSameCoordinate(a: [number, number], b: [number, number]) {
@@ -216,6 +235,9 @@ export function useLogisticsTwinScenario() {
     const selectedDispatchResources = LOGISTICS_TWIN_DISPATCH_RESOURCES.filter(
       (resource) => selectedDispatchResourceCodes.value.includes(resource.code),
     )
+    const routeCoordinates = target
+      ? getDispatchRouteCoordinates(target, destination)
+      : []
     const vehicleMarkers: MapEntityMarkerItem[] = target
       ? selectedDispatchResources.map((resource, index) => {
           const isTransporter = resource.group === TRANSPORTER_GROUP
@@ -260,6 +282,7 @@ export function useLogisticsTwinScenario() {
               ? {
                   stop: target.lngLat,
                   destination: destination.lngLat,
+                  routeCoordinates,
                   approachDurationMs: 0,
                   dwellDurationMs: 300,
                   departureDurationMs: 5000 + index * 300,
@@ -286,6 +309,7 @@ export function useLogisticsTwinScenario() {
     if (currentStep.value !== 5 || !targetObstruction.value) return []
     const target = targetObstruction.value
     const destination = getLogisticsTwinDestination(target)
+    const routeCoordinates = getDispatchRouteCoordinates(target, destination)
     const selectedDispatchResources = LOGISTICS_TWIN_DISPATCH_RESOURCES.filter(
       (resource) => selectedDispatchResourceCodes.value.includes(resource.code),
     )
@@ -301,11 +325,7 @@ export function useLogisticsTwinScenario() {
         ? getDispatchVehicleStartPosition(target)
         : target.lngLat
 
-    return compactRouteCoordinates([
-      routeStart,
-      target.lngLat,
-      destination.lngLat,
-    ])
+    return compactRouteCoordinates([routeStart, ...routeCoordinates])
   })
 
   function updateObstructionStatus(

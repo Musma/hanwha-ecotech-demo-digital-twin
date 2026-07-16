@@ -28,6 +28,51 @@ function interpolateCoordinate(
   ]
 }
 
+function getCoordinateDistance(from: Coordinate, to: Coordinate) {
+  return Math.hypot(to[0] - from[0], to[1] - from[1])
+}
+
+function getDepartureRoute(motion: MapEntityMarkerMotion) {
+  return motion.routeCoordinates && motion.routeCoordinates.length >= 2
+    ? motion.routeCoordinates
+    : [motion.stop, motion.destination]
+}
+
+function interpolateRouteCoordinate(
+  route: Coordinate[],
+  progress: number,
+): Coordinate {
+  if (route.length <= 1) return route[0] ?? [0, 0]
+
+  const easedProgress = easeInOutCubic(Math.min(1, Math.max(0, progress)))
+  const segmentLengths = route
+    .slice(1)
+    .map((coordinate, index) => getCoordinateDistance(route[index], coordinate))
+  const totalLength = segmentLengths.reduce((sum, length) => sum + length, 0)
+  if (totalLength <= 0) return route[route.length - 1]
+
+  const targetLength = totalLength * easedProgress
+  let accumulatedLength = 0
+  for (let index = 0; index < segmentLengths.length; index += 1) {
+    const segmentLength = segmentLengths[index]
+    if (accumulatedLength + segmentLength < targetLength) {
+      accumulatedLength += segmentLength
+      continue
+    }
+
+    if (segmentLength <= 0) return route[index + 1]
+    const segmentProgress = (targetLength - accumulatedLength) / segmentLength
+    return [
+      route[index][0] +
+        (route[index + 1][0] - route[index][0]) * segmentProgress,
+      route[index][1] +
+        (route[index + 1][1] - route[index][1]) * segmentProgress,
+    ]
+  }
+
+  return route[route.length - 1]
+}
+
 export function startVehicleRouteAnimation(
   marker: Marker,
   start: Coordinate,
@@ -43,6 +88,7 @@ export function startVehicleRouteAnimation(
   const approachEnd = motion.approachDurationMs
   const dwellEnd = approachEnd + motion.dwellDurationMs
   const motionEnd = dwellEnd + motion.departureDurationMs
+  const departureRoute = getDepartureRoute(motion)
   let animationFrame: number | null = null
   let startedAt: number | null = null
   let lastPosition: Coordinate | null = null
@@ -72,9 +118,8 @@ export function startVehicleRouteAnimation(
       updatePosition(motion.stop, 'dwell')
     } else if (elapsed < motionEnd) {
       updatePosition(
-        interpolateCoordinate(
-          motion.stop,
-          motion.destination,
+        interpolateRouteCoordinate(
+          departureRoute,
           (elapsed - dwellEnd) / motion.departureDurationMs,
         ),
         'departure',

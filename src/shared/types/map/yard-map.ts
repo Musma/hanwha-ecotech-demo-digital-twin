@@ -28,6 +28,7 @@ export interface MapRouteFocusRequest extends FocusRequestBase {
 export interface MapEntityMarkerMotion {
   stop: [number, number]
   destination: [number, number]
+  routeCoordinates?: Array<[number, number]>
   approachDurationMs: number
   dwellDurationMs: number
   departureDurationMs: number
