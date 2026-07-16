@@ -76,6 +76,13 @@ export interface LogisticsTwinPinPosition {
   y: number
 }
 
+const OB14_FIXED_DESTINATION: LogisticsTwinDestinationLocation = {
+  label: '목적지',
+  jibun: '(010, 047)',
+  phys: [10, 47],
+  lngLat: [127.59248449820326, 34.90175834892184],
+}
+
 export const LOGISTICS_TWIN_STEPS: LogisticsTwinStep[] = [
   { id: 1, label: '문제 발생', icon: 'ti ti-alert-triangle' },
   { id: 2, label: '시스템 접속', icon: 'ti ti-login-2' },
@@ -99,6 +106,7 @@ export const LOGISTICS_TWIN_OBSTRUCTIONS: LogisticsTwinObstruction[] = [
     reporter: '생산운영파트 김현수',
     status: '확인',
     detail: '도로 중앙에 적치된 강재로 트랜스포터 통행이 불가합니다.',
+    destination: OB14_FIXED_DESTINATION,
     photo: stackedSteelPhotoUrl,
   },
   {
