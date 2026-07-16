@@ -1,8 +1,9 @@
 import drumPhotoUrl from '@/features/logged/tablet/assets/photos/drum.jpg'
 import forkliftPhotoUrl from '@/features/logged/tablet/assets/photos/forklift.jpg'
 import pipePhotoUrl from '@/features/logged/tablet/assets/photos/pipe.jpg'
-import steelPhotoUrl from '@/features/logged/tablet/assets/photos/steel.webp'
 import wastePhotoUrl from '@/features/logged/tablet/assets/photos/waste.png'
+
+const stackedSteelPhotoUrl = `${import.meta.env.BASE_URL}ex.png`
 
 export interface LogisticsTwinStep {
   id: number
@@ -88,8 +89,8 @@ export const LOGISTICS_TWIN_OBSTRUCTIONS: LogisticsTwinObstruction[] = [
   {
     id: 'OBS-2605-014',
     label: 'OB14',
-    name: '적치 배관 다발',
-    kind: '자재(배관)',
+    name: '적치 강재',
+    kind: '적치(강재)',
     jibun: '1Y-도로-051-009',
     phys: [51, 9],
     lngLat: [127.59276225088207, 34.902050461860455],
@@ -97,8 +98,8 @@ export const LOGISTICS_TWIN_OBSTRUCTIONS: LogisticsTwinObstruction[] = [
     foundAt: '2026.05.22 08:10',
     reporter: '생산운영파트 김현수',
     status: '확인',
-    detail: '도로 중앙에 적치된 배관 자재 다발로 트랜스포터 통행이 불가합니다.',
-    photo: pipePhotoUrl,
+    detail: '도로 중앙에 적치된 강재로 트랜스포터 통행이 불가합니다.',
+    photo: stackedSteelPhotoUrl,
   },
   {
     id: 'OBS-2605-009',
@@ -133,17 +134,17 @@ export const LOGISTICS_TWIN_OBSTRUCTIONS: LogisticsTwinObstruction[] = [
   {
     id: 'OBS-2605-021',
     label: 'OB21',
-    name: '임시 적치 강재',
-    kind: '자재(강재)',
+    name: '적치 배관 다발',
+    kind: '자재(배관)',
     jibun: '1Y-도로-074-025',
     phys: [74, 25],
     lngLat: [127.59582636387162, 34.90218988351647],
-    days: 0,
-    foundAt: '2026.05.22 11:40',
-    reporter: '생산운영파트 변학도',
+    days: 2,
+    foundAt: '2026.05.22 08:10',
+    reporter: '생산운영파트 김현수',
     status: '확인',
-    detail: '금일 임시 적치된 강재로, 단기 통행 우회가 필요합니다.',
-    photo: steelPhotoUrl,
+    detail: '도로 중앙에 적치된 배관 자재 다발로 트랜스포터 통행이 불가합니다.',
+    photo: pipePhotoUrl,
   },
   {
     id: 'OBS-2605-022',
