@@ -555,6 +555,57 @@ function compactTrackCoordinates(coordinates: Array<[number, number]>) {
   )
 }
 
+function getSquaredTrackDistance(a: [number, number], b: [number, number]) {
+  return (a[0] - b[0]) ** 2 + (a[1] - b[1]) ** 2
+}
+
+function getRemainingTrackCoordinates(
+  position: [number, number],
+  routeCoordinates: Array<[number, number]>,
+) {
+  if (routeCoordinates.length < 2) return compactTrackCoordinates([position])
+
+  let closestSegmentIndex = 0
+  let closestDistance = Number.POSITIVE_INFINITY
+
+  for (let index = 0; index < routeCoordinates.length - 1; index += 1) {
+    const segmentStart = routeCoordinates[index]
+    const segmentEnd = routeCoordinates[index + 1]
+    const segmentDelta: [number, number] = [
+      segmentEnd[0] - segmentStart[0],
+      segmentEnd[1] - segmentStart[1],
+    ]
+    const segmentLength = segmentDelta[0] ** 2 + segmentDelta[1] ** 2
+    const progress =
+      segmentLength > 0
+        ? Math.min(
+            1,
+            Math.max(
+              0,
+              ((position[0] - segmentStart[0]) * segmentDelta[0] +
+                (position[1] - segmentStart[1]) * segmentDelta[1]) /
+                segmentLength,
+            ),
+          )
+        : 0
+    const projected: [number, number] = [
+      segmentStart[0] + segmentDelta[0] * progress,
+      segmentStart[1] + segmentDelta[1] * progress,
+    ]
+    const distance = getSquaredTrackDistance(position, projected)
+
+    if (distance < closestDistance) {
+      closestDistance = distance
+      closestSegmentIndex = index
+    }
+  }
+
+  return compactTrackCoordinates([
+    position,
+    ...routeCoordinates.slice(closestSegmentIndex + 1),
+  ])
+}
+
 function updateWorkTrackFromVehicle(
   position: [number, number],
   motion: MapEntityMarkerItem['motion'],
@@ -572,10 +623,10 @@ function updateWorkTrackFromVehicle(
     motion.routeCoordinates && motion.routeCoordinates.length >= 2
       ? motion.routeCoordinates
       : null
-  if (motionRouteCoordinates) return
 
-  const coordinates =
-    phase === 'approach' || phase === 'dwell'
+  const coordinates = motionRouteCoordinates
+    ? getRemainingTrackCoordinates(position, motionRouteCoordinates)
+    : phase === 'approach' || phase === 'dwell'
       ? compactTrackCoordinates([position, motion.stop, motion.destination])
       : compactTrackCoordinates([position, motion.destination])
 
