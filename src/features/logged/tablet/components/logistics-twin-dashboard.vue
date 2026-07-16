@@ -143,7 +143,7 @@ const {
                 <div
                   v-if="currentStep === 1"
                   key="locked"
-                  class="main-scroll-style absolute inset-0 z-20 flex flex-col items-center justify-start overflow-y-auto bg-cover bg-center p-6 text-center text-hw-white-main lg:justify-center"
+                  class="main-scroll-style absolute inset-0 z-20 flex flex-col items-center justify-start overflow-y-auto bg-hw-gray-darker bg-cover bg-center p-6 text-center text-hw-white-main lg:justify-center"
                   :style="{ backgroundImage: tabletBackgroundImage }"
                 >
                   <div

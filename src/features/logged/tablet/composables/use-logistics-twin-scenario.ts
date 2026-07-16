@@ -384,6 +384,8 @@ export function useLogisticsTwinScenario() {
   function unlockTablet() {
     selectedId.value = ''
     markerInfoId.value = ''
+    if (startDispatchFromDashboardRequest()) return
+
     currentStep.value = 4
     showToast('태블릿 잠금이 해제되었습니다')
   }
@@ -498,7 +500,7 @@ export function useLogisticsTwinScenario() {
 
   function startDispatchFromDashboardRequest() {
     const registered = logisticsObstructionStore.registeredObstruction
-    if (!registered?.dispatchRequestAt) return
+    if (!registered?.dispatchRequestAt) return false
 
     const target = createObstructionFromRegistered(registered)
     upsertObstruction(target)
@@ -511,6 +513,7 @@ export function useLogisticsTwinScenario() {
     dispatchConfirmed.value = false
     logisticsObstructionStore.consumeDispatchRequest()
     showToast('디지털 트윈에서 선택한 간섭물 이동 배차를 진행합니다')
+    return true
   }
 
   function openObstructionInDashboard(item: LogisticsTwinObstruction) {
@@ -611,8 +614,6 @@ export function useLogisticsTwinScenario() {
     toastMessage.value = ''
     mapViewResetRequest.value += 1
   }
-
-  startDispatchFromDashboardRequest()
 
   return {
     closeObstructionInfo,
