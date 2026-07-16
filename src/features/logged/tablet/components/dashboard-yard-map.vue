@@ -447,10 +447,14 @@ function ensureRoadJibunLayers() {
       source: ROAD_JIBUN_SOURCE_ID,
       paint: {
         'line-color': '#111111',
-        'line-opacity': 0.72,
-        'line-width': 1.8,
+        'line-opacity': 0,
+        'line-width': 0,
       },
     })
+  }
+  if (map.getLayer(ROAD_JIBUN_LINE_LAYER_ID)) {
+    map.setPaintProperty(ROAD_JIBUN_LINE_LAYER_ID, 'line-opacity', 0)
+    map.setPaintProperty(ROAD_JIBUN_LINE_LAYER_ID, 'line-width', 0)
   }
 }
 
