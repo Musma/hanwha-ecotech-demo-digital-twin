@@ -24,24 +24,10 @@ const NEW_OBSTRUCTION_VEHICLE_MARKER_OFFSET_Y = -34
 const NEW_OBSTRUCTION_VEHICLE_MARKER_OFFSET_X = 22
 const TRANSPORTER_GROUP = '트랜스포터'
 
-function getDispatchVehicleWaitingPosition({
-  destination,
-  index,
-  isNewObstructionTarget,
-  target,
-}: {
-  destination: { lngLat: [number, number] }
-  index: number
-  isNewObstructionTarget: boolean
-  target: LogisticsTwinObstruction
-}): [number, number] {
-  if (isNewObstructionTarget) return target.lngLat
-
-  const routeRatio = 0.25 + index * 0.1
-  return [
-    target.lngLat[0] + (destination.lngLat[0] - target.lngLat[0]) * routeRatio,
-    target.lngLat[1] + (destination.lngLat[1] - target.lngLat[1]) * routeRatio,
-  ]
+function getDispatchVehicleStartPosition(
+  target: LogisticsTwinObstruction,
+): [number, number] {
+  return target.lngLat
 }
 
 function isSameCoordinate(a: [number, number], b: [number, number]) {
@@ -244,12 +230,7 @@ export function useLogisticsTwinScenario() {
             !isTransporter &&
             selectedDispatchResources.length > 1 &&
             !movesAlongRoute
-          const waitingPosition = getDispatchVehicleWaitingPosition({
-            destination,
-            index,
-            isNewObstructionTarget,
-            target,
-          })
+          const startPosition = getDispatchVehicleStartPosition(target)
 
           return {
             id: `scenario-vehicle-${resource.code}`,
@@ -257,7 +238,7 @@ export function useLogisticsTwinScenario() {
             name: `${resource.group} ${resource.code}`,
             iconClass:
               resource.group === '지게차' ? 'ti ti-forklift' : 'ti ti-truck',
-            phys: waitingPosition,
+            phys: startPosition,
             offset: shouldOffsetVehicleMarker
               ? ([
                   index % 2 === 0
@@ -279,8 +260,8 @@ export function useLogisticsTwinScenario() {
               ? {
                   stop: target.lngLat,
                   destination: destination.lngLat,
-                  approachDurationMs: 1800 + index * 300,
-                  dwellDurationMs: 2000,
+                  approachDurationMs: 0,
+                  dwellDurationMs: 300,
                   departureDurationMs: 5000 + index * 300,
                 }
               : undefined,
@@ -305,8 +286,6 @@ export function useLogisticsTwinScenario() {
     if (currentStep.value !== 5 || !targetObstruction.value) return []
     const target = targetObstruction.value
     const destination = getLogisticsTwinDestination(target)
-    const isNewObstructionTarget =
-      target.id === LOGISTICS_TWIN_NEW_OBSTRUCTION_ID
     const selectedDispatchResources = LOGISTICS_TWIN_DISPATCH_RESOURCES.filter(
       (resource) => selectedDispatchResourceCodes.value.includes(resource.code),
     )
@@ -319,12 +298,7 @@ export function useLogisticsTwinScenario() {
     )
     const routeStart =
       movingResourceIndex >= 0
-        ? getDispatchVehicleWaitingPosition({
-            destination,
-            index: movingResourceIndex,
-            isNewObstructionTarget,
-            target,
-          })
+        ? getDispatchVehicleStartPosition(target)
         : target.lngLat
 
     return compactRouteCoordinates([
