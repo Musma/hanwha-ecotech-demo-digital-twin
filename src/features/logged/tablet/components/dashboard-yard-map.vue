@@ -486,6 +486,19 @@ function updateWorkTrackAnimation() {
   if (shouldAnimate) stopWorkTrackAnimation = startWorkTrackAnimation(map)
 }
 
+function clearWorkTrack() {
+  const map = mapRef.value
+  if (!map || !mapLoaded.value) return
+
+  stopCurrentWorkTrackAnimation()
+  if (map.getLayer(WORK_TRACK_FLOW_LAYER_ID)) {
+    map.setLayoutProperty(WORK_TRACK_FLOW_LAYER_ID, 'visibility', 'none')
+  }
+  ;(map.getSource(WORK_TRACK_SOURCE_ID) as GeoJSONSource | undefined)?.setData(
+    createEmptyFeatureCollection(),
+  )
+}
+
 function updateWorkTrack() {
   const map = mapRef.value
   if (!map || !mapLoaded.value) return
@@ -550,13 +563,19 @@ function updateWorkTrackFromVehicle(
   const map = mapRef.value
   if (!map || !mapLoaded.value || !motion) return
 
+  if (phase === 'done') {
+    clearWorkTrack()
+    return
+  }
+
   const motionRouteCoordinates =
     motion.routeCoordinates && motion.routeCoordinates.length >= 2
       ? motion.routeCoordinates
       : null
-  const coordinates = motionRouteCoordinates
-    ? compactTrackCoordinates(motionRouteCoordinates)
-    : phase === 'approach' || phase === 'dwell'
+  if (motionRouteCoordinates) return
+
+  const coordinates =
+    phase === 'approach' || phase === 'dwell'
       ? compactTrackCoordinates([position, motion.stop, motion.destination])
       : compactTrackCoordinates([position, motion.destination])
 
@@ -700,8 +719,7 @@ function updateMarkers() {
       }
       const motion = marker.motion
       if (motion) {
-        const shouldUpdateTrackFromVehicle =
-          marker.updatesTrack !== false && !motion.routeCoordinates
+        const shouldUpdateTrackFromVehicle = marker.updatesTrack !== false
         stopMarkerAnimations.push(
           startVehicleRouteAnimation(
             mapMarker,
