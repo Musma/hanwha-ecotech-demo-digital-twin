@@ -184,4 +184,10 @@ export const ROAD_JIBUN_SEED: RoadJibunSource[] = [
       { axis: 'row', row: 152, from: 14, to: 16 },
     ],
   },
+  {
+    id: 'road-011',
+    name: '도로지번 011',
+    poly: '(1507.5,136.9)(1531.7,138.1)(1530.5,24.8)(1506.2,25.6)',
+    cellRanges: [{ axis: 'row', row: 151, from: 3, to: 13 }],
+  },
 ]
