@@ -6,7 +6,7 @@ import maplibregl, {
   type MapMouseEvent,
   type Marker,
 } from 'maplibre-gl'
-import { computed, onMounted, onUnmounted, ref, shallowRef, watch } from 'vue'
+import { computed, onMounted, onUnmounted, shallowRef, watch } from 'vue'
 
 import 'maplibre-gl/dist/maplibre-gl.css'
 
@@ -32,21 +32,10 @@ import {
   YARD_GRID_BOUNDARY_ROTATION_DEG,
   YARD_JIBUN_KIND_COLORS,
 } from '@/shared/constants/map-yard'
-import {
-  buildGridGeoJson,
-  type LatLng,
-  type LocalPoint,
-} from '@/shared/helpers/map/grid-utils'
+import { buildGridGeoJson } from '@/shared/helpers/map/grid-utils'
 import { collapseMapAttribution } from '@/shared/helpers/map/map-control-utils'
-import {
-  convertLngLatToLocalPolyPoint,
-  isPointInsidePolygon,
-  normalizeGridBoundaryCoordinates,
-} from '@/shared/helpers/map/map-geo-helpers'
-import {
-  getPhysicalGridAddress,
-  getPhysicalGridCellCenter,
-} from '@/shared/helpers/map/physical-address'
+import { normalizeGridBoundaryCoordinates } from '@/shared/helpers/map/map-geo-helpers'
+import { getPhysicalGridAddress } from '@/shared/helpers/map/physical-address'
 import type {
   MapEntityMarkerItem,
   YardMapProps,
@@ -79,8 +68,6 @@ interface Props {
   trackAnimated?: boolean
   /** true이면 지도 클릭 좌표를 물리지번으로 변환해 전달한다. */
   pickMode?: boolean
-  /** true이면 도로 폴리곤 임시 작성 패널을 표시한다. */
-  roadPolygonToolVisible?: boolean
   /** 값이 증가하면 지도를 초기 카메라 위치로 되돌린다. */
   viewResetRequest?: number
 }
@@ -94,7 +81,6 @@ const props = withDefaults(defineProps<Props>(), {
   trackCoordinates: () => [],
   trackAnimated: false,
   pickMode: false,
-  roadPolygonToolVisible: false,
   viewResetRequest: 0,
 })
 
@@ -137,14 +123,8 @@ const JIBUN_POLYGON_LINE_LAYER_ID = 'dashboard-jibun-polygon-line'
 const ROAD_JIBUN_SOURCE_ID = 'dashboard-road-jibun-polygons'
 const ROAD_JIBUN_FILL_LAYER_ID = 'dashboard-road-jibun-polygon-fill'
 const ROAD_JIBUN_LINE_LAYER_ID = 'dashboard-road-jibun-polygon-line'
-const ROAD_POLYGON_DRAW_SOURCE_ID = 'dashboard-road-polygon-draw'
-const ROAD_POLYGON_DRAW_FILL_LAYER_ID = 'dashboard-road-polygon-draw-fill'
-const ROAD_POLYGON_DRAW_LINE_LAYER_ID = 'dashboard-road-polygon-draw-line'
-const ROAD_POLYGON_DRAW_POINT_LAYER_ID = 'dashboard-road-polygon-draw-point'
 const WORK_TRACK_SOURCE_ID = 'dashboard-work-track'
 const WORK_TRACK_LAYER_ID = 'dashboard-work-track'
-const ROAD_POLYGON_GRID_SCAN_PADDING = 1
-const ROAD_POLYGON_VISIBLE_CELL_LIMIT = 36
 
 const YARD_GRID_ORIGIN = {
   lat: YARD_DEFAULT_CENTER[1],
@@ -160,8 +140,7 @@ const YARD_GRID_BOUNDARY = normalizeGridBoundaryCoordinates(
 function updatePickModeCursor() {
   const map = mapRef.value
   if (!map) return
-  map.getCanvas().style.cursor =
-    props.pickMode || roadPolygonDrawActive.value ? 'crosshair' : ''
+  map.getCanvas().style.cursor = props.pickMode ? 'crosshair' : ''
 }
 
 function resetMapView() {
@@ -208,19 +187,7 @@ function handleLocationPick(event: MapMouseEvent) {
   })
 }
 
-function handleRoadPolygonDrawClick(event: MapMouseEvent) {
-  if (!roadPolygonDrawActive.value) return false
-
-  event.originalEvent.preventDefault()
-  roadPolygonPoints.value = [
-    ...roadPolygonPoints.value,
-    { lat: event.lngLat.lat, lng: event.lngLat.lng },
-  ]
-  return true
-}
-
 function handleMapClick(event: MapMouseEvent) {
-  if (handleRoadPolygonDrawClick(event)) return
   handleLocationPick(event)
 }
 
@@ -242,9 +209,6 @@ const mapRef = shallowRef<MapLibreMap | null>(null)
 const markerRefs = shallowRef<Marker[]>([])
 const labelMarkerRefs = shallowRef<Marker[]>([])
 const liveMarkerRef = shallowRef<Marker | null>(null)
-const roadPolygonDrawActive = ref(false)
-const roadPolygonPoints = ref<LatLng[]>([])
-const roadPolygonCopyStatus = ref('')
 const mapLoaded = shallowRef(false)
 const initialCameraRef = shallowRef<{
   center: [number, number]
@@ -252,7 +216,6 @@ const initialCameraRef = shallowRef<{
 } | null>(null)
 let stopWorkTrackAnimation: (() => void) | null = null
 let stopMarkerAnimations: Array<() => void> = []
-let roadPolygonCopyStatusTimer: number | null = null
 
 const mapBounds = computed<LngLatBoundsLike>(() => {
   const lngs = MAP_VIEW_COORDINATES.map(([lng]) => lng)
@@ -269,102 +232,6 @@ function createEmptyFeatureCollection(): DashboardGeoJsonFeatureCollection {
     features: [],
   }
 }
-
-function parsePhysicalGridLabel(label: string): [number, number] | null {
-  const matched = /^\((\d+),\s*(\d+)\)$/.exec(label)
-  if (!matched) return null
-  return [Number(matched[1]), Number(matched[2])]
-}
-
-function formatPhysicalGridLabel(phys: [number, number]) {
-  return `(${String(phys[0]).padStart(3, '0')}, ${String(phys[1]).padStart(3, '0')})`
-}
-
-function formatRoadPolygonLocalNumber(value: number) {
-  return Number(value.toFixed(1)).toString()
-}
-
-const roadPolygonVertexLabels = computed(() =>
-  roadPolygonPoints.value
-    .map((point) =>
-      getPhysicalGridAddress(
-        point,
-        YARD_GRID_ORIGIN,
-        DEFAULT_GRID_SIZE_METERS,
-        DEFAULT_GRID_SIZE_METERS,
-        YARD_GRID_BOUNDARY,
-      ),
-    )
-    .filter(Boolean),
-)
-
-const roadPolygonLocalPolyText = computed(() =>
-  roadPolygonPoints.value
-    .map((point) =>
-      convertLngLatToLocalPolyPoint(
-        point,
-        YARD_GRID_BOUNDARY,
-        YARD_GRID_ORIGIN,
-      ),
-    )
-    .filter((point): point is LocalPoint => Boolean(point))
-    .map(
-      (point) =>
-        `(${formatRoadPolygonLocalNumber(point.x)},${formatRoadPolygonLocalNumber(point.y)})`,
-    )
-    .join(''),
-)
-
-const roadPolygonMatchedGridCells = computed(() => {
-  if (roadPolygonPoints.value.length < 3) return []
-
-  const vertexPhys = roadPolygonVertexLabels.value
-    .map(parsePhysicalGridLabel)
-    .filter((phys): phys is [number, number] => Boolean(phys))
-  if (vertexPhys.length === 0) return []
-
-  const cols = vertexPhys.map(([col]) => col)
-  const rows = vertexPhys.map(([, row]) => row)
-  const minCol = Math.max(0, Math.min(...cols) - ROAD_POLYGON_GRID_SCAN_PADDING)
-  const maxCol = Math.max(...cols) + ROAD_POLYGON_GRID_SCAN_PADDING
-  const minRow = Math.max(0, Math.min(...rows) - ROAD_POLYGON_GRID_SCAN_PADDING)
-  const maxRow = Math.max(...rows) + ROAD_POLYGON_GRID_SCAN_PADDING
-  const cells: Array<{ label: string; phys: [number, number] }> = []
-
-  for (let row = minRow; row <= maxRow; row += 1) {
-    for (let col = minCol; col <= maxCol; col += 1) {
-      const phys: [number, number] = [col, row]
-      const center = getPhysicalGridCellCenter(
-        phys,
-        YARD_GRID_ORIGIN,
-        DEFAULT_GRID_SIZE_METERS,
-        DEFAULT_GRID_SIZE_METERS,
-        YARD_GRID_BOUNDARY,
-      )
-      if (!center || !isPointInsidePolygon(center, roadPolygonPoints.value)) {
-        continue
-      }
-
-      cells.push({ label: formatPhysicalGridLabel(phys), phys })
-    }
-  }
-
-  return cells
-})
-
-const visibleRoadPolygonMatchedGridCells = computed(() =>
-  roadPolygonMatchedGridCells.value.slice(0, ROAD_POLYGON_VISIBLE_CELL_LIMIT),
-)
-
-const roadPolygonResultText = computed(() => {
-  const cells = roadPolygonMatchedGridCells.value
-    .map((cell) => cell.label)
-    .join(', ')
-  return [
-    `poly: '${roadPolygonLocalPolyText.value}'`,
-    `cells: ${cells || '-'}`,
-  ].join('\n')
-})
 
 function createPolygonFeatureCollection(): DashboardGeoJsonFeatureCollection {
   const features: DashboardGeoJsonFeatureCollection['features'] = []
@@ -466,156 +333,6 @@ function updateRoadJibunLayers() {
   ;(map.getSource(ROAD_JIBUN_SOURCE_ID) as GeoJSONSource | undefined)?.setData(
     createRoadJibunFeatureCollection(),
   )
-}
-
-function createRoadPolygonDrawFeatureCollection(): DashboardGeoJsonFeatureCollection {
-  const points = roadPolygonPoints.value
-  const features: DashboardGeoJsonFeatureCollection['features'] = []
-
-  if (points.length >= 3) {
-    const coordinates = points.map((point) => [point.lng, point.lat])
-    coordinates.push(coordinates[0])
-    features.push({
-      type: 'Feature',
-      geometry: { type: 'Polygon', coordinates: [coordinates] },
-      properties: { role: 'road-polygon-fill' },
-    })
-  }
-
-  if (points.length >= 2) {
-    const coordinates = points.map((point) => [point.lng, point.lat])
-    if (points.length >= 3) coordinates.push(coordinates[0])
-    features.push({
-      type: 'Feature',
-      geometry: { type: 'LineString', coordinates },
-      properties: { role: 'road-polygon-line' },
-    })
-  }
-
-  points.forEach((point, index) => {
-    features.push({
-      type: 'Feature',
-      geometry: { type: 'Point', coordinates: [point.lng, point.lat] },
-      properties: {
-        index: index + 1,
-        role: 'road-polygon-point',
-      },
-    })
-  })
-
-  return {
-    type: 'FeatureCollection',
-    features,
-  }
-}
-
-function ensureRoadPolygonDrawLayer() {
-  const map = mapRef.value
-  if (!map || !mapLoaded.value) return
-
-  if (!map.getSource(ROAD_POLYGON_DRAW_SOURCE_ID)) {
-    map.addSource(ROAD_POLYGON_DRAW_SOURCE_ID, {
-      type: 'geojson',
-      data: createEmptyFeatureCollection(),
-    })
-  }
-  if (!map.getLayer(ROAD_POLYGON_DRAW_FILL_LAYER_ID)) {
-    map.addLayer({
-      id: ROAD_POLYGON_DRAW_FILL_LAYER_ID,
-      type: 'fill',
-      source: ROAD_POLYGON_DRAW_SOURCE_ID,
-      filter: ['==', ['get', 'role'], 'road-polygon-fill'],
-      paint: {
-        'fill-color': '#F37321',
-        'fill-opacity': 0.28,
-      },
-    })
-  }
-  if (!map.getLayer(ROAD_POLYGON_DRAW_LINE_LAYER_ID)) {
-    map.addLayer({
-      id: ROAD_POLYGON_DRAW_LINE_LAYER_ID,
-      type: 'line',
-      source: ROAD_POLYGON_DRAW_SOURCE_ID,
-      filter: ['==', ['get', 'role'], 'road-polygon-line'],
-      layout: {
-        'line-cap': 'round',
-        'line-join': 'round',
-      },
-      paint: {
-        'line-color': '#F37321',
-        'line-width': 3,
-        'line-opacity': 0.95,
-      },
-    })
-  }
-  if (!map.getLayer(ROAD_POLYGON_DRAW_POINT_LAYER_ID)) {
-    map.addLayer({
-      id: ROAD_POLYGON_DRAW_POINT_LAYER_ID,
-      type: 'circle',
-      source: ROAD_POLYGON_DRAW_SOURCE_ID,
-      filter: ['==', ['get', 'role'], 'road-polygon-point'],
-      paint: {
-        'circle-color': '#FFFFFF',
-        'circle-radius': 5,
-        'circle-stroke-color': '#F37321',
-        'circle-stroke-width': 2,
-      },
-    })
-  }
-}
-
-function updateRoadPolygonDrawLayer() {
-  const map = mapRef.value
-  if (!map || !mapLoaded.value) return
-
-  ensureRoadPolygonDrawLayer()
-  ;(
-    map.getSource(ROAD_POLYGON_DRAW_SOURCE_ID) as GeoJSONSource | undefined
-  )?.setData(createRoadPolygonDrawFeatureCollection())
-}
-
-function startRoadPolygonDraw() {
-  roadPolygonDrawActive.value = true
-  updatePickModeCursor()
-}
-
-function finishRoadPolygonDraw() {
-  if (roadPolygonPoints.value.length < 3) return
-  roadPolygonDrawActive.value = false
-  updatePickModeCursor()
-}
-
-function undoRoadPolygonPoint() {
-  roadPolygonPoints.value = roadPolygonPoints.value.slice(0, -1)
-}
-
-function resetRoadPolygonDraw() {
-  roadPolygonDrawActive.value = false
-  roadPolygonPoints.value = []
-  roadPolygonCopyStatus.value = ''
-  updatePickModeCursor()
-}
-
-function setRoadPolygonCopyStatus(message: string) {
-  roadPolygonCopyStatus.value = message
-  if (roadPolygonCopyStatusTimer !== null) {
-    window.clearTimeout(roadPolygonCopyStatusTimer)
-  }
-  roadPolygonCopyStatusTimer = window.setTimeout(() => {
-    roadPolygonCopyStatus.value = ''
-    roadPolygonCopyStatusTimer = null
-  }, 1800)
-}
-
-async function copyRoadPolygonResult() {
-  if (!roadPolygonLocalPolyText.value) return
-
-  try {
-    await navigator.clipboard.writeText(roadPolygonResultText.value)
-    setRoadPolygonCopyStatus('복사되었습니다')
-  } catch {
-    setRoadPolygonCopyStatus('복사할 수 없습니다')
-  }
 }
 
 function ensureDashboardGridLayer() {
@@ -1113,7 +830,6 @@ function initializeMap() {
     focusSelectedMarker()
     updateLiveMarker()
     updateWorkTrack()
-    updateRoadPolygonDrawLayer()
     updatePickModeCursor()
     requestAnimationFrame(() => map.resize())
   })
@@ -1141,7 +857,6 @@ function syncMapStyle() {
     focusSelectedMarker()
     updateLiveMarker()
     updateWorkTrack()
-    updateRoadPolygonDrawLayer()
     updatePickModeCursor()
     requestAnimationFrame(() => map.resize())
   })
@@ -1205,17 +920,6 @@ watch(
 )
 
 watch(
-  () => roadPolygonPoints.value,
-  () => updateRoadPolygonDrawLayer(),
-  { deep: true },
-)
-
-watch(
-  () => roadPolygonDrawActive.value,
-  () => updatePickModeCursor(),
-)
-
-watch(
   () => props.viewResetRequest,
   (request) => {
     if (!request) return
@@ -1229,9 +933,6 @@ onMounted(() => {
 
 onUnmounted(() => {
   stopCurrentWorkTrackAnimation()
-  if (roadPolygonCopyStatusTimer !== null) {
-    window.clearTimeout(roadPolygonCopyStatusTimer)
-  }
   clearMarkers()
   clearLabelMarkers()
   liveMarkerRef.value?.remove()
@@ -1249,131 +950,5 @@ onUnmounted(() => {
     <div ref="mapRootRef" class="absolute inset-0 h-full w-full" />
 
     <slot />
-
-    <div
-      v-if="roadPolygonToolVisible"
-      class="absolute bottom-4 right-4 z-30 w-[340px] max-w-[calc(100%-2rem)] rounded-md border border-hw-gray-lighter bg-hw-white-main/95 p-3 text-hw-text-primary shadow-lg backdrop-blur"
-      @click.stop
-    >
-      <div class="flex items-start justify-between gap-3">
-        <div class="min-w-0">
-          <p class="text-c1 font-bold text-hw-orange-main">도로 폴리곤</p>
-          <p class="mt-0.5 text-c1 text-hw-gray-dark">
-            {{
-              roadPolygonDrawActive
-                ? '지도 클릭으로 꼭짓점을 추가합니다'
-                : '폴리곤을 그려 격자 목록을 확인합니다'
-            }}
-          </p>
-        </div>
-        <span
-          class="shrink-0 rounded-sm px-2 py-1 text-c1 font-bold"
-          :class="
-            roadPolygonDrawActive
-              ? 'bg-hw-orange-lighter text-hw-orange-dark'
-              : 'bg-hw-white-lighter text-hw-gray-dark'
-          "
-        >
-          {{ roadPolygonPoints.length }}점
-        </span>
-      </div>
-
-      <div class="mt-3 grid grid-cols-4 gap-1.5">
-        <button
-          type="button"
-          class="rounded-md bg-hw-orange-main px-2 py-2 text-c1 font-bold text-hw-white-main transition-colors hover:bg-hw-orange-dark disabled:bg-hw-gray-main"
-          @click="startRoadPolygonDraw"
-        >
-          그리기
-        </button>
-        <button
-          type="button"
-          class="rounded-md border border-hw-gray-lighter bg-hw-white-main px-2 py-2 text-c1 font-bold text-hw-gray-darker transition-colors hover:bg-hw-btn-hover disabled:text-hw-gray-main"
-          :disabled="roadPolygonPoints.length < 3"
-          @click="finishRoadPolygonDraw"
-        >
-          완료
-        </button>
-        <button
-          type="button"
-          class="rounded-md border border-hw-gray-lighter bg-hw-white-main px-2 py-2 text-c1 font-bold text-hw-gray-darker transition-colors hover:bg-hw-btn-hover disabled:text-hw-gray-main"
-          :disabled="roadPolygonPoints.length === 0"
-          @click="undoRoadPolygonPoint"
-        >
-          되돌리기
-        </button>
-        <button
-          type="button"
-          class="rounded-md border border-hw-gray-lighter bg-hw-white-main px-2 py-2 text-c1 font-bold text-hw-gray-darker transition-colors hover:bg-hw-btn-hover disabled:text-hw-gray-main"
-          :disabled="roadPolygonPoints.length === 0"
-          @click="resetRoadPolygonDraw"
-        >
-          초기화
-        </button>
-      </div>
-
-      <div class="mt-3 space-y-2">
-        <label class="block text-c1 font-bold text-hw-gray-dark">
-          복사용 텍스트
-          <textarea
-            class="mt-1 h-14 w-full resize-none rounded-md border border-hw-gray-lighter bg-hw-white-lighter px-2 py-1 font-mono text-c1 text-hw-text-primary"
-            readonly
-            :value="roadPolygonResultText"
-          />
-        </label>
-
-        <div
-          class="rounded-md border border-hw-gray-lighter bg-hw-white-lighter p-2"
-        >
-          <div class="flex items-center justify-between gap-2">
-            <b class="text-c1 text-hw-gray-dark">
-              포함 격자 {{ roadPolygonMatchedGridCells.length }}개
-            </b>
-            <button
-              type="button"
-              class="rounded-sm bg-hw-gray-darker px-2 py-1 text-c1 font-bold text-hw-white-main transition-colors hover:bg-hw-black"
-              :disabled="!roadPolygonLocalPolyText"
-              @click="copyRoadPolygonResult"
-            >
-              복사
-            </button>
-          </div>
-          <div
-            v-if="visibleRoadPolygonMatchedGridCells.length"
-            class="mt-2 flex max-h-28 flex-wrap gap-1 overflow-y-auto"
-          >
-            <span
-              v-for="cell in visibleRoadPolygonMatchedGridCells"
-              :key="cell.label"
-              class="rounded-sm bg-hw-white-main px-1.5 py-0.5 font-mono text-c1 font-semibold text-hw-text-primary"
-            >
-              {{ cell.label }}
-            </span>
-          </div>
-          <p v-else class="mt-2 text-c1 text-hw-gray-dark">
-            세 점 이상 찍으면 포함 격자가 표시됩니다.
-          </p>
-          <p
-            v-if="
-              roadPolygonMatchedGridCells.length >
-              visibleRoadPolygonMatchedGridCells.length
-            "
-            class="mt-2 text-c1 text-hw-gray-dark"
-          >
-            외
-            {{
-              roadPolygonMatchedGridCells.length -
-              visibleRoadPolygonMatchedGridCells.length
-            }}개
-          </p>
-          <p
-            v-if="roadPolygonCopyStatus"
-            class="mt-2 text-c1 text-hw-green-dark"
-          >
-            {{ roadPolygonCopyStatus }}
-          </p>
-        </div>
-      </div>
-    </div>
   </div>
 </template>
