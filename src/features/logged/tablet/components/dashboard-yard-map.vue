@@ -700,15 +700,17 @@ function updateMarkers() {
       }
       const motion = marker.motion
       if (motion) {
+        const shouldUpdateTrackFromVehicle =
+          marker.updatesTrack !== false && !motion.routeCoordinates
         stopMarkerAnimations.push(
           startVehicleRouteAnimation(
             mapMarker,
             [marker.phys[0], marker.phys[1]],
             motion,
-            marker.updatesTrack === false
-              ? undefined
-              : (position, phase) =>
-                  updateWorkTrackFromVehicle(position, motion, phase),
+            shouldUpdateTrackFromVehicle
+              ? (position, phase) =>
+                  updateWorkTrackFromVehicle(position, motion, phase)
+              : undefined,
           ),
         )
       }
