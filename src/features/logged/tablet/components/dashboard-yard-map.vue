@@ -115,6 +115,12 @@ const SELECTED_MARKER_FOCUS_ZOOM_INCREMENT = 1
 const SELECTED_MARKER_MAX_FOCUS_ZOOM = 17
 const SELECTED_MARKER_FOCUS_DURATION_MS = 650
 const SELECTED_MARKER_FOCUS_OFFSET: [number, number] = [0, 100]
+const MARKER_SCALE_MIN_ZOOM = 13
+const MARKER_SCALE_MAX_ZOOM = 16
+const JIBUN_MARKER_MIN_SCALE = 0.55
+const JIBUN_MARKER_MAX_SCALE = 1
+const ENTITY_MARKER_MIN_SCALE = 0.42
+const ENTITY_MARKER_MAX_SCALE = 0.82
 const YARD_GRID_SOURCE_ID = 'dashboard-yard-grid'
 const YARD_GRID_LAYER_ID = 'dashboard-yard-grid'
 const JIBUN_POLYGON_SOURCE_ID = 'dashboard-jibun-polygons'
@@ -659,6 +665,53 @@ function clearLabelMarkers() {
   labelMarkerRefs.value = []
 }
 
+function getResponsiveMarkerScale(
+  zoom: number,
+  minScale: number,
+  maxScale: number,
+) {
+  if (!Number.isFinite(zoom)) return maxScale
+  if (zoom <= MARKER_SCALE_MIN_ZOOM) return minScale
+  if (zoom >= MARKER_SCALE_MAX_ZOOM) return maxScale
+
+  const progress =
+    (zoom - MARKER_SCALE_MIN_ZOOM) /
+    (MARKER_SCALE_MAX_ZOOM - MARKER_SCALE_MIN_ZOOM)
+  return minScale + progress * (maxScale - minScale)
+}
+
+function updateResponsiveMarkerScale() {
+  const map = mapRef.value
+  const zoom = map?.getZoom() ?? MARKER_SCALE_MAX_ZOOM
+  const entityScale = getResponsiveMarkerScale(
+    zoom,
+    ENTITY_MARKER_MIN_SCALE,
+    ENTITY_MARKER_MAX_SCALE,
+  )
+  const jibunScale = getResponsiveMarkerScale(
+    zoom,
+    JIBUN_MARKER_MIN_SCALE,
+    JIBUN_MARKER_MAX_SCALE,
+  )
+
+  markerRefs.value.forEach((marker) => {
+    marker
+      .getElement()
+      .style.setProperty(
+        '--dashboard-entity-marker-scale',
+        entityScale.toFixed(3),
+      )
+  })
+  labelMarkerRefs.value.forEach((marker) => {
+    marker
+      .getElement()
+      .style.setProperty(
+        '--dashboard-jibun-marker-scale',
+        jibunScale.toFixed(3),
+      )
+  })
+}
+
 function updateLabelMarkers() {
   const map = mapRef.value
   if (!map || !mapLoaded.value) return
@@ -675,9 +728,11 @@ function updateLabelMarkers() {
         { lat: 0, lng: 0 },
       )
       const el = document.createElement('div')
-      el.className =
-        'rounded-sm bg-hw-gray-darker/75 px-1.5 py-0.5 text-c1 font-bold text-hw-white-main shadow-sm'
-      el.textContent = polygon.name
+      el.className = 'dashboard-jibun-label'
+      const body = document.createElement('span')
+      body.className = 'dashboard-jibun-label__body'
+      body.textContent = polygon.name
+      el.append(body)
       return new maplibregl.Marker({ element: el, anchor: 'center' })
         .setLngLat([
           centroid.lng / polygon.points.length,
@@ -686,6 +741,7 @@ function updateLabelMarkers() {
         .addTo(map)
     })
     .filter((marker): marker is Marker => Boolean(marker))
+  updateResponsiveMarkerScale()
 }
 
 function updateMarkers() {
@@ -729,6 +785,8 @@ function updateMarkers() {
         )
       }
 
+      const body = document.createElement('span')
+      body.className = 'dashboard-map-marker__body'
       const showWave =
         marker.showWave ?? (marker.selected || marker.tone === 'vehicle')
       if (showWave) {
@@ -737,7 +795,7 @@ function updateMarkers() {
           wave.className = 'dashboard-map-marker__wave'
           return wave
         })
-        el.append(...waves)
+        body.append(...waves)
       }
 
       const tag = document.createElement('span')
@@ -750,7 +808,8 @@ function updateMarkers() {
       } else {
         tag.textContent = marker.label ?? marker.name ?? ''
       }
-      el.append(tag)
+      body.append(tag)
+      el.append(body)
 
       const mapMarker = new maplibregl.Marker({
         element: el,
@@ -786,6 +845,7 @@ function updateMarkers() {
       return mapMarker
     })
     .filter((marker): marker is Marker => Boolean(marker))
+  updateResponsiveMarkerScale()
 }
 
 function focusSelectedMarker() {
@@ -884,6 +944,7 @@ function initializeMap() {
   collapseMapAttribution(map)
   mapRef.value = map
   map.on('click', handleMapClick)
+  map.on('zoom', updateResponsiveMarkerScale)
   // 핀치 줌(확대/축소)은 허용하되, 야드 정렬 유지를 위해 두 손가락 회전은 비활성화한다.
   map.touchZoomRotate.disableRotation()
   map.once('load', () => {
@@ -1013,6 +1074,7 @@ onUnmounted(() => {
   clearLabelMarkers()
   liveMarkerRef.value?.remove()
   liveMarkerRef.value = null
+  mapRef.value?.off('zoom', updateResponsiveMarkerScale)
   mapRef.value?.remove()
   mapRef.value = null
   mapLoaded.value = false
