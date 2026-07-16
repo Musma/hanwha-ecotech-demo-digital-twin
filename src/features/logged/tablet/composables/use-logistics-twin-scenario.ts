@@ -24,6 +24,11 @@ import type { MapEntityMarkerItem } from '@/shared/types/map/yard-map'
 const NEW_OBSTRUCTION_VEHICLE_MARKER_OFFSET_Y = -34
 const NEW_OBSTRUCTION_VEHICLE_MARKER_OFFSET_X = 22
 const TRANSPORTER_GROUP = '트랜스포터'
+const DISPATCH_ROUTE_MIN_DURATION_MS = 9500
+const DISPATCH_ROUTE_MAX_DURATION_MS = 18000
+const DISPATCH_ROUTE_MS_PER_METER = 36
+const DISPATCH_RESOURCE_STAGGER_DURATION_MS = 500
+const METERS_PER_DEGREE_LAT = 111320
 
 function getDispatchVehicleStartPosition(
   target: LogisticsTwinObstruction,
@@ -57,6 +62,35 @@ function compactRouteCoordinates(coordinates: Array<[number, number]>) {
   return coordinates.filter(
     (coordinate, index) =>
       index === 0 || !isSameCoordinate(coordinate, coordinates[index - 1]),
+  )
+}
+
+function getRouteDistanceMeters(coordinates: Array<[number, number]>) {
+  return coordinates.slice(1).reduce((distance, coordinate, index) => {
+    const previous = coordinates[index]
+    const averageLatitude =
+      ((previous[1] + coordinate[1]) / 2) * (Math.PI / 180)
+    const metersPerDegreeLng =
+      METERS_PER_DEGREE_LAT * Math.max(Math.cos(averageLatitude), 0.000001)
+    const deltaLngMeters = (coordinate[0] - previous[0]) * metersPerDegreeLng
+    const deltaLatMeters = (coordinate[1] - previous[1]) * METERS_PER_DEGREE_LAT
+    return distance + Math.hypot(deltaLngMeters, deltaLatMeters)
+  }, 0)
+}
+
+function getDispatchDepartureDurationMs(
+  routeCoordinates: Array<[number, number]>,
+  resourceIndex: number,
+) {
+  const routeDuration = Math.round(
+    getRouteDistanceMeters(routeCoordinates) * DISPATCH_ROUTE_MS_PER_METER,
+  )
+  return (
+    Math.min(
+      DISPATCH_ROUTE_MAX_DURATION_MS,
+      Math.max(DISPATCH_ROUTE_MIN_DURATION_MS, routeDuration),
+    ) +
+    resourceIndex * DISPATCH_RESOURCE_STAGGER_DURATION_MS
   )
 }
 
@@ -285,7 +319,10 @@ export function useLogisticsTwinScenario() {
                   routeCoordinates,
                   approachDurationMs: 0,
                   dwellDurationMs: 300,
-                  departureDurationMs: 5000 + index * 300,
+                  departureDurationMs: getDispatchDepartureDurationMs(
+                    routeCoordinates,
+                    index,
+                  ),
                 }
               : undefined,
           }
