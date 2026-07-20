@@ -1,6 +1,5 @@
 <script setup lang="ts">
-const PROCESS_TWIN_APP_URL =
-  'https://musma.github.io/hanwha-sf-pos-demo/#chair'
+const PROCESS_TWIN_APP_URL = 'https://musma.github.io/hanwha-sf-pos/#chair'
 
 const emit = defineEmits<{
   close: []
