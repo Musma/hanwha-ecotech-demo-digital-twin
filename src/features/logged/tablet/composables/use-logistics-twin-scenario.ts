@@ -516,6 +516,23 @@ export function useLogisticsTwinScenario() {
     return true
   }
 
+  function restoreMoveRequestFromRegisteredObstruction() {
+    const registered = logisticsObstructionStore.registeredObstruction
+    if (!registered) return false
+
+    const target = createObstructionFromRegistered(registered)
+    upsertObstruction(target)
+    selectedId.value = target.id
+    markerInfoId.value = target.id
+    targetId.value = ''
+    selectedDispatchResourceCodes.value = []
+    dispatchConfirmed.value = false
+    pendingStartLocation.value = null
+    pendingDestinationLocation.value = null
+    currentStep.value = 4
+    return true
+  }
+
   function openObstructionInDashboard(item: LogisticsTwinObstruction) {
     const registered = logisticsObstructionStore.registeredObstruction
     const locationLabel =
@@ -613,6 +630,10 @@ export function useLogisticsTwinScenario() {
     records.value = []
     toastMessage.value = ''
     mapViewResetRequest.value += 1
+  }
+
+  if (!startDispatchFromDashboardRequest()) {
+    restoreMoveRequestFromRegisteredObstruction()
   }
 
   return {
