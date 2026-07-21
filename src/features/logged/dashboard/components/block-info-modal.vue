@@ -73,6 +73,7 @@ const BLOCK_INFO_ROWS: BlockInfoRow[] = [
   position: absolute;
   top: 0;
   left: 0;
+  z-index: 30;
   width: 1920px;
   height: 1140px;
   pointer-events: none;
