@@ -36,7 +36,7 @@ export const isDashboardModal = (value: unknown): value is DashboardModal =>
  */
 export const useDashboardOverlays = () => {
   const activeModal = ref<DashboardModal | null>(null)
-  const isSideNavOpen = ref(false)
+  const isSideNavOpen = ref(true)
   const isLlmChatOpen = ref(false)
   const detailSidebar = ref<DetailSidebarKind | null>(null)
 
