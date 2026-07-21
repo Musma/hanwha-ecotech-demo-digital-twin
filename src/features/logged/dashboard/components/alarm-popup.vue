@@ -65,7 +65,7 @@ const handleClose = () => {
               <span class="action-label-outline">위치 이동</span>
             </button>
             <button class="action-button-filled" type="button">
-              <span class="action-label-filled">LMM Search</span>
+              <span class="action-label-filled">LLM Search</span>
             </button>
           </div>
         </div>
