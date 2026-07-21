@@ -100,7 +100,7 @@ const emit = defineEmits<{
 
 .tree-row--top {
   flex-shrink: 0;
-  width: 300px;
+  width: 330px;
   height: 36px;
 }
 
@@ -118,7 +118,7 @@ const emit = defineEmits<{
   gap: 0;
   align-items: flex-end;
   justify-content: flex-start;
-  width: 300px;
+  width: 330px;
 }
 
 .node-button {
@@ -136,11 +136,11 @@ const emit = defineEmits<{
 }
 
 .node-button--root {
-  width: 300px;
+  width: 330px;
 }
 
 .node-button--group {
-  width: 233px;
+  width: 263px;
 }
 
 .node-icon {
@@ -212,7 +212,7 @@ const emit = defineEmits<{
   gap: 0;
   align-items: flex-start;
   justify-content: flex-start;
-  width: 233px;
+  width: 263px;
 }
 
 .leaf-indent {
@@ -244,7 +244,7 @@ const emit = defineEmits<{
   gap: 0;
   align-items: center;
   justify-content: flex-start;
-  width: 199px;
+  width: 229px;
   height: 32px;
   padding: 0 0 0 12px;
   cursor: pointer;

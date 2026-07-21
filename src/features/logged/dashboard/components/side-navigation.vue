@@ -80,7 +80,7 @@ const activeTab = ref<SideNavTabId>('block')
   gap: 10px;
   align-items: flex-start;
   justify-content: flex-start;
-  width: 320px;
+  width: 350px;
   height: 990px;
   padding: 10px;
   pointer-events: auto;
@@ -95,7 +95,7 @@ const activeTab = ref<SideNavTabId>('block')
   flex-shrink: 0;
   align-items: center;
   justify-content: space-between;
-  width: 300px;
+  width: 330px;
   height: 40px;
   overflow: hidden;
   background: #444444;
