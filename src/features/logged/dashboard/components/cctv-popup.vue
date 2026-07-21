@@ -88,6 +88,7 @@ const ALARM_FIELDS: AlarmField[] = [
   position: absolute;
   left: 0;
   top: 0;
+  z-index: 30;
   width: 1920px;
   height: 1140px;
   pointer-events: none;
