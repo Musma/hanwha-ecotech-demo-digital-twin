@@ -498,9 +498,10 @@ onUnmounted(() => {
 
 .registered-obstruction-photo {
   width: 100%;
-  height: 126px;
+  height: 160px;
   margin-top: 12px;
-  object-fit: cover;
+  object-fit: contain;
+  background: rgba(255, 255, 255, 0.06);
   border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 8px;
 }
