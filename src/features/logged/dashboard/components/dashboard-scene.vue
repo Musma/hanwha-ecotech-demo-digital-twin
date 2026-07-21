@@ -169,6 +169,11 @@ onUnmounted(() => {
       alt=""
     />
     <img
+      class="scene-equipment-marker"
+      src="@/assets/images/screen-16/_3-d-10.png"
+      alt=""
+    />
+    <img
       class="block-shadow"
       src="@/assets/images/screen-16/rectangle-48350.svg"
       alt=""
@@ -181,11 +186,6 @@ onUnmounted(() => {
     <img
       class="scene-glow"
       src="@/assets/images/screen-16/group-4280.svg"
-      alt=""
-    />
-    <img
-      class="block-outline"
-      src="@/assets/images/screen-16/rectangle-48180.svg"
       alt=""
     />
 
@@ -315,11 +315,21 @@ onUnmounted(() => {
 .scene-image-base {
   position: absolute;
   top: 0;
-  left: -901.57px;
-  width: 2951.87px;
-  height: 1647.56px;
+  left: 0;
+  width: 1921px;
+  height: 1140px;
   object-fit: cover;
-  aspect-ratio: 2951.87 / 1647.56;
+  aspect-ratio: 1921 / 1140;
+}
+
+.scene-equipment-marker {
+  position: absolute;
+  right: 129px;
+  bottom: 132px;
+  width: 87px;
+  height: 79px;
+  object-fit: cover;
+  aspect-ratio: 87 / 79;
 }
 
 .block-shadow {
@@ -350,16 +360,6 @@ onUnmounted(() => {
   height: auto;
   overflow: visible;
   transform: translate(-0.53px, -0.47px);
-}
-
-.block-outline {
-  position: absolute;
-  top: 319px;
-  left: 831px;
-  width: 271.5px;
-  height: 140.5px;
-  overflow: visible;
-  border-radius: 0;
 }
 
 .block-hotspot {
