@@ -17,6 +17,7 @@ const emit = defineEmits<{
   'block-click': []
   'cctv-click': []
 }>()
+const dashboardBackgroundImage = `${import.meta.env.BASE_URL}bg.png`
 
 interface CctvZone {
   label: string
@@ -164,7 +165,7 @@ onUnmounted(() => {
   <div class="dashboard-scene">
     <img
       class="scene-image-base"
-      src="@/assets/images/screen-16/gemini-generated-image-wyy-8-xvwyy-8-xvwyy-8-10.png"
+      :src="dashboardBackgroundImage"
       alt=""
     />
     <img

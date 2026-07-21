@@ -10,7 +10,7 @@ import LoggedPageShell from '@/shared/components/logged-page-shell.vue'
 
 const { jibunPolygons, roadPolygons } = useDashboardMapState()
 const { currentDate, currentTime } = useTabletClock()
-const tabletBackgroundImage = `url(${import.meta.env.BASE_URL}bg.png)`
+const tabletBackgroundImage = `url(${import.meta.env.BASE_URL}login.webp)`
 
 function moveToDashboardRoute() {
   if (typeof window === 'undefined') return
