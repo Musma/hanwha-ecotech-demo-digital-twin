@@ -211,9 +211,10 @@ watch(
       <AlarmPopup v-if="activeModal === 'alarm'" @close="closeActiveModal" />
     </Transition>
 
+    <!-- 공정 Twin은 iframe 앱 부팅 비용이 커서 v-show로 미리 마운트해 두고 표시만 토글한다 -->
     <Transition name="modal-fade">
       <ProcessTwinModal
-        v-if="activeModal === 'twin-process'"
+        v-show="activeModal === 'twin-process'"
         @close="closeActiveModal"
       />
     </Transition>
