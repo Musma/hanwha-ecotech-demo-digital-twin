@@ -86,6 +86,16 @@ const openWeather = () => {
             </div>
           </div>
         </button>
+        <button
+          class="icon-button"
+          type="button"
+          aria-label="동영상 재생"
+          title="동영상 재생"
+        >
+          <div class="icon-frame">
+            <CirclePlayIcon class="play-icon" aria-hidden="true" />
+          </div>
+        </button>
         <div class="icon-button">
           <div class="icon-frame">
             <div class="icon-box">
@@ -97,16 +107,6 @@ const openWeather = () => {
             </div>
           </div>
         </div>
-        <button
-          class="icon-button"
-          type="button"
-          aria-label="동영상 재생"
-          title="동영상 재생"
-        >
-          <div class="icon-frame">
-            <CirclePlayIcon class="play-icon" aria-hidden="true" />
-          </div>
-        </button>
         <div class="user-area">
           <button class="llm-button" type="button" @click="emit('llm-click')">
             <img
