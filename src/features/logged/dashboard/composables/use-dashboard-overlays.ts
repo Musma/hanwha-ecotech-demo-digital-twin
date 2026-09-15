@@ -11,6 +11,7 @@ export type DashboardModal =
   | 'recording-list'
   | 'recording-player'
   | 'cctv'
+  | 'safety-sop'
   | 'alarm'
   | `twin-${TwinTabId}`
 
@@ -25,6 +26,7 @@ export const DASHBOARD_MODALS = [
   'recording-list',
   'recording-player',
   'cctv',
+  'safety-sop',
   'alarm',
   'twin-process',
   'twin-logistics',

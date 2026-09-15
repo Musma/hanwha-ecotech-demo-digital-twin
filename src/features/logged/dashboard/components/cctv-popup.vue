@@ -1,8 +1,4 @@
 <script setup lang="ts">
-defineProps<{
-  confirmUrl: string
-}>()
-
 const emit = defineEmits<{
   close: []
   confirm: []
@@ -21,7 +17,11 @@ const ALARM_FIELDS: AlarmField[] = [
     valueClass: 'value-location',
   },
   { label: '알람 유형', value: '화재 발생', valueClass: 'value-type' },
-  { label: '발생 시각', value: '26년 7월 14일 14:04', valueClass: 'value-time' },
+  {
+    label: '발생 시각',
+    value: '26년 7월 14일 14:04',
+    valueClass: 'value-time',
+  },
   {
     label: '위험 등급',
     value: 'CRITICAL — Level 4',
@@ -68,15 +68,9 @@ const ALARM_FIELDS: AlarmField[] = [
           <button class="history-button" type="button">
             <div class="button-text">알람 내역</div>
           </button>
-          <a
-            class="confirm-button"
-            :href="confirmUrl"
-            target="_blank"
-            rel="noopener noreferrer"
-            @click="emit('confirm')"
-          >
+          <button class="confirm-button" type="button" @click="emit('confirm')">
             <div class="button-text">확인</div>
-          </a>
+          </button>
         </div>
       </div>
     </div>

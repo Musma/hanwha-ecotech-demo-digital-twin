@@ -98,6 +98,7 @@ const closeActiveModal = () => {
 
 const confirmCctvAlarm = () => {
   closeActiveModal()
+  openModal('safety-sop')
 }
 
 const shouldCollapseKpiPanel = computed(() => routeModal.value === 'cctv')
@@ -219,13 +220,20 @@ watch(
     <Transition name="modal-fade">
       <CctvPopup
         v-if="activeModal === 'cctv'"
-        :confirm-url="safetySopUrl"
         @close="closeActiveModal"
         @confirm="confirmCctvAlarm"
       />
     </Transition>
     <Transition name="modal-fade">
       <AlarmPopup v-if="activeModal === 'alarm'" @close="closeActiveModal" />
+    </Transition>
+    <Transition name="modal-fade">
+      <ProcessTwinModal
+        v-if="activeModal === 'safety-sop'"
+        :app-url="safetySopUrl"
+        title="안전 SOP"
+        @close="closeActiveModal"
+      />
     </Transition>
 
     <Transition name="modal-fade">
