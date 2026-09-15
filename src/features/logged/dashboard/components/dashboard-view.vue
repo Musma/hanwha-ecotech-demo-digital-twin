@@ -6,6 +6,7 @@ import AlarmPopup from '@/features/logged/dashboard/components/alarm-popup.vue'
 import AreaDetailSidebar from '@/features/logged/dashboard/components/area-detail-sidebar.vue'
 import BlockDetailSidebar from '@/features/logged/dashboard/components/block-detail-sidebar.vue'
 import BlockInfoModal from '@/features/logged/dashboard/components/block-info-modal.vue'
+import CaseVideoModal from '@/features/logged/dashboard/components/case-video-modal.vue'
 import CctvPopup from '@/features/logged/dashboard/components/cctv-popup.vue'
 import DashboardHeader from '@/features/logged/dashboard/components/dashboard-header.vue'
 import DashboardKpiPanel from '@/features/logged/dashboard/components/dashboard-kpi-panel.vue'
@@ -143,6 +144,7 @@ watch(
       @record-click="openModal('recording-list')"
       @alarm-click="openModal('alarm')"
       @llm-click="toggleLlmChat"
+      @video-click="openModal('case-video')"
     />
 
     <Transition name="slide-left">
@@ -173,6 +175,12 @@ watch(
       />
     </Transition>
 
+    <Transition name="modal-fade">
+      <CaseVideoModal
+        v-if="activeModal === 'case-video'"
+        @close="closeActiveModal"
+      />
+    </Transition>
     <Transition name="modal-fade">
       <ProductionAchievementModal
         v-if="activeModal === 'production'"

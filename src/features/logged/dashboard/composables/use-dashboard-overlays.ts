@@ -6,6 +6,7 @@ export type DashboardModal =
   | 'production'
   | 'production-raw-data'
   | 'llm-process-plan'
+  | 'case-video'
   | 'block-info'
   | 'recording-list'
   | 'recording-player'
@@ -19,6 +20,7 @@ export const DASHBOARD_MODALS = [
   'production',
   'production-raw-data',
   'llm-process-plan',
+  'case-video',
   'block-info',
   'recording-list',
   'recording-player',

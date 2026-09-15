@@ -6,6 +6,7 @@ const emit = defineEmits<{
   'record-click': []
   'alarm-click': []
   'llm-click': []
+  'video-click': []
 }>()
 
 const openWeather = () => {
@@ -91,6 +92,7 @@ const openWeather = () => {
           type="button"
           aria-label="동영상 재생"
           title="동영상 재생"
+          @click="emit('video-click')"
         >
           <div class="icon-frame">
             <CirclePlayIcon class="play-icon" aria-hidden="true" />
