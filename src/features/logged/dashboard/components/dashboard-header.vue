@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { CirclePlayIcon } from '@lucide/vue'
+
 const emit = defineEmits<{
   'menu-click': []
   'record-click': []
@@ -95,6 +97,16 @@ const openWeather = () => {
             </div>
           </div>
         </div>
+        <button
+          class="icon-button"
+          type="button"
+          aria-label="동영상 재생"
+          title="동영상 재생"
+        >
+          <div class="icon-frame">
+            <CirclePlayIcon class="play-icon" aria-hidden="true" />
+          </div>
+        </button>
         <div class="user-area">
           <button class="llm-button" type="button" @click="emit('llm-click')">
             <img
@@ -267,6 +279,12 @@ button.icon-button {
   width: 75%;
   height: 83.33%;
   overflow: visible;
+}
+
+.play-icon {
+  width: 24px;
+  height: 24px;
+  color: #ffffff;
 }
 
 .user-area {
