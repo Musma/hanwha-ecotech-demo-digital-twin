@@ -169,7 +169,7 @@ watch(
       <LlmChatSidebar
         v-show="isLlmChatOpen"
         @close="closeLlmChat"
-        @open-process-twin="openModal('twin-process')"
+        @open-process-twin="openModal('llm-process-plan')"
       />
     </Transition>
 
@@ -220,6 +220,13 @@ watch(
       <AlarmPopup v-if="activeModal === 'alarm'" @close="closeActiveModal" />
     </Transition>
 
+    <Transition name="modal-fade">
+      <ProcessTwinModal
+        v-if="activeModal === 'llm-process-plan'"
+        app-url="https://musma.github.io/hanwha-sf-pos/#ppha-b110"
+        @close="closeActiveModal"
+      />
+    </Transition>
     <!-- 공정 Twin은 iframe 앱 부팅 비용이 커서 v-show로 미리 마운트해 두고 표시만 토글한다 -->
     <Transition name="modal-fade">
       <ProcessTwinModal

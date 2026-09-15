@@ -5,6 +5,7 @@ export type TwinTabId = 'process' | 'logistics' | 'equipment' | 'hse'
 export type DashboardModal =
   | 'production'
   | 'production-raw-data'
+  | 'llm-process-plan'
   | 'block-info'
   | 'recording-list'
   | 'recording-player'
@@ -17,6 +18,7 @@ export type DetailSidebarKind = 'block' | 'area'
 export const DASHBOARD_MODALS = [
   'production',
   'production-raw-data',
+  'llm-process-plan',
   'block-info',
   'recording-list',
   'recording-player',
