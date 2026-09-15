@@ -177,6 +177,15 @@ watch(
       <ProductionAchievementModal
         v-if="activeModal === 'production'"
         @close="closeActiveModal"
+        @open-raw-data="openModal('production-raw-data')"
+      />
+    </Transition>
+    <Transition name="modal-fade">
+      <ProcessTwinModal
+        v-if="activeModal === 'production-raw-data'"
+        app-url="https://musma.github.io/hanwha-sf-pos/#sojo"
+        title="Raw Data Link"
+        @close="openModal('production')"
       />
     </Transition>
     <Transition name="modal-fade">

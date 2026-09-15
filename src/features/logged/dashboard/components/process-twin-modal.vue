@@ -1,5 +1,14 @@
 <script setup lang="ts">
-const PROCESS_TWIN_APP_URL = 'https://musma.github.io/hanwha-sf-pos/'
+withDefaults(
+  defineProps<{
+    appUrl?: string
+    title?: string
+  }>(),
+  {
+    appUrl: 'https://musma.github.io/hanwha-sf-pos/',
+    title: '공정 Twin',
+  },
+)
 
 const emit = defineEmits<{
   close: []
@@ -11,8 +20,13 @@ const emit = defineEmits<{
     <div class="modal-backdrop" @click="emit('close')" />
     <div class="modal-panel">
       <div class="modal-header">
-        <div class="modal-title">공정 Twin</div>
-        <button class="close-button" type="button" @click="emit('close')">
+        <div class="modal-title">{{ title }}</div>
+        <button
+          class="close-button"
+          type="button"
+          aria-label="닫기"
+          @click="emit('close')"
+        >
           <img
             class="close-icon"
             src="@/assets/images/screen-17/icon11.svg"
@@ -20,11 +34,7 @@ const emit = defineEmits<{
           />
         </button>
       </div>
-      <iframe
-        class="modal-app-view"
-        :src="PROCESS_TWIN_APP_URL"
-        title="공정 Twin"
-      />
+      <iframe class="modal-app-view" :src="appUrl" :title="title" />
     </div>
   </div>
 </template>

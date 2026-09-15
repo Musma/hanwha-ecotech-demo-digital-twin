@@ -1,6 +1,7 @@
 <script setup lang="ts">
 const emit = defineEmits<{
   close: []
+  openRawData: []
 }>()
 
 const PROCESS_TABS = [
@@ -156,14 +157,14 @@ const PROCESS_ROWS = [
         <div class="footer-text-wrap">
           <div class="footer-text">※ Raw Data Link 연동</div>
         </div>
-        <div class="footer-link">
-          <div class="footer-link-text">바로가기</div>
+        <button class="footer-link" type="button" @click="emit('openRawData')">
+          <span class="footer-link-text">바로가기</span>
           <img
             class="footer-link-icon"
             src="@/assets/images/screen-3/icon2.svg"
             alt=""
           />
-        </div>
+        </button>
       </div>
     </div>
   </div>
