@@ -3,8 +3,8 @@ import { onScopeDispose, reactive, readonly, ref, shallowRef } from 'vue'
 import { FAKE_LLM_RESPONSE } from '@/features/logged/dashboard/constants/llm-chat'
 import type { LlmChatMessage } from '@/features/logged/dashboard/types/llm-chat'
 
-const LLM_RESPONSE_DELAY_MS = 3000
-const LLM_TYPING_INTERVAL_MS = 30
+const LLM_RESPONSE_DELAY_MS = 500
+const LLM_TYPING_INTERVAL_MS = 5
 
 const formatTime = (date: Date) => {
   const hours = String(date.getHours()).padStart(2, '0')
