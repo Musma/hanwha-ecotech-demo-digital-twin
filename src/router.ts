@@ -5,6 +5,7 @@ import {
 } from 'vue-router'
 
 import type { DashboardModal } from '@/features/logged/dashboard/composables/use-dashboard-overlays'
+import { useSessionStore } from '@/shared/stores/session'
 
 const dashboardPage = () => import('@/pages/dashboard/index.vue')
 const safetyAlertDashboardModal: DashboardModal = 'cctv'
@@ -15,6 +16,7 @@ const routes: RouteRecordRaw[] = [
     path: '/login',
     name: 'login',
     component: () => import('@/pages/login.vue'),
+    meta: { public: true },
   },
   {
     path: '/dashboard',
@@ -43,6 +45,16 @@ const routes: RouteRecordRaw[] = [
 const router = createRouter({
   history: createWebHashHistory(import.meta.env.BASE_URL),
   routes,
+})
+
+// 로그인 화면 외의 모든 경로는 로그인한 사용자만 들어갈 수 있다.
+router.beforeEach((to) => {
+  if (to.meta.public === true) return true
+
+  const session = useSessionStore()
+  if (session.isLoggedIn) return true
+
+  return { name: 'login', query: { redirect: to.fullPath } }
 })
 
 export default router
