@@ -9,7 +9,7 @@ import { validateLogin } from '@/features/public/utils/validate-login'
 /** 로그인 입력값, 검증, 실패 토스트 상태를 관리한다. */
 export function useLoginForm(onSuccess: () => void) {
   const userId = ref<string>(LOGIN_ACCOUNT.userId)
-  const password = ref<string>(LOGIN_ACCOUNT.password)
+  const password = ref('')
   const toastMessage = ref('')
   // 같은 문구가 연달아 나와도 토스트가 다시 그려지도록 키를 바꾼다.
   const toastKey = ref(0)
