@@ -1,16 +1,18 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import LoginToast from '@/features/public/components/login-toast.vue'
+import { useLoginForm } from '@/features/public/composables/use-login-form'
 
 const emit = defineEmits<{
   login: []
 }>()
 
-const userId = ref('ecotec')
-const password = ref('hanwha')
-
-const handleLogin = () => {
-  emit('login')
-}
+const {
+  userId,
+  password,
+  toastMessage,
+  toastKey,
+  submit: handleLogin,
+} = useLoginForm(() => emit('login'))
 </script>
 
 <template>
@@ -49,6 +51,7 @@ const handleLogin = () => {
       src="@/assets/images/screen-1/group-2000.svg"
       alt=""
     />
+    <LoginToast :message="toastMessage" :message-key="toastKey" />
   </div>
 </template>
 
