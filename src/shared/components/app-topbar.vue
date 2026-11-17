@@ -1,6 +1,20 @@
 <script setup lang="ts">
+import { nextTick } from 'vue'
+
 import hanwhaMarkUrl from '@/assets/images/hanwha-mark.svg'
 import { Button } from '@/shared/components/ui/button'
+import { redirectToLogin } from '@/shared/helpers/login-redirect'
+import { useSessionStore } from '@/shared/stores/session'
+
+const session = useSessionStore()
+
+// 태블릿 화면은 라우터가 없는 별도 진입점이므로 주소를 직접 바꿔 로그인 화면으로 보낸다.
+const handleLogout = async () => {
+  session.logout()
+  // 로그아웃 상태가 저장소에 기록된 뒤 이동해야 다음 진입에서 다시 막힌다.
+  await nextTick()
+  redirectToLogin()
+}
 </script>
 
 <template>
@@ -32,6 +46,7 @@ import { Button } from '@/shared/components/ui/button'
         size="brand-icon"
         class="relative"
         title="로그아웃"
+        @click="handleLogout"
       >
         <i class="ti ti-logout" />
       </Button>

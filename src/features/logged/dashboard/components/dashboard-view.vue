@@ -28,9 +28,16 @@ import {
   useDashboardOverlays,
   type DashboardModal,
 } from '@/features/logged/dashboard/composables/use-dashboard-overlays'
+import { useSessionStore } from '@/shared/stores/session'
 
 const route = useRoute()
 const router = useRouter()
+const session = useSessionStore()
+
+const handleLogout = () => {
+  session.logout()
+  router.replace({ name: 'login' })
+}
 const safetySopUrl = 'https://musma.github.io/hanwha-ecotech-demo-HSEMVP/#/sop'
 
 const {
@@ -146,6 +153,7 @@ watch(
       @alarm-click="openModal('alarm')"
       @llm-click="toggleLlmChat"
       @video-click="openModal('case-video')"
+      @logout-click="handleLogout"
     />
 
     <Transition name="slide-left">

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { CirclePlayIcon } from '@lucide/vue'
+import { CirclePlayIcon, LogOutIcon } from '@lucide/vue'
 
 const emit = defineEmits<{
   'menu-click': []
@@ -7,6 +7,7 @@ const emit = defineEmits<{
   'alarm-click': []
   'llm-click': []
   'video-click': []
+  'logout-click': []
 }>()
 
 const openWeather = () => {
@@ -131,6 +132,17 @@ const openWeather = () => {
             </div>
           </div>
         </div>
+        <button
+          class="icon-button"
+          type="button"
+          aria-label="로그아웃"
+          title="로그아웃"
+          @click="emit('logout-click')"
+        >
+          <div class="icon-frame">
+            <LogOutIcon class="logout-icon" aria-hidden="true" />
+          </div>
+        </button>
       </div>
     </div>
   </div>
@@ -283,7 +295,8 @@ button.icon-button {
   overflow: visible;
 }
 
-.play-icon {
+.play-icon,
+.logout-icon {
   width: 24px;
   height: 24px;
   color: #ffffff;

@@ -70,6 +70,12 @@ export const useSessionStore = defineStore('session', () => {
     locationPermission.value = 'unknown'
   }
 
+  // 다른 창(태블릿 iframe, 다른 탭)에서 로그인 상태가 바뀌면 이 창에도 반영한다.
+  window.addEventListener('storage', (event) => {
+    if (event.key !== null && event.key !== STORAGE_KEY) return
+    isLoggedIn.value = readPersisted()?.isLoggedIn ?? false
+  })
+
   watch(
     [androidId, matchedResource, isLoggedIn],
     () => {
