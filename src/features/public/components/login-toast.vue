@@ -23,8 +23,8 @@ defineProps<{
 <style scoped lang="scss">
 .login-toast {
   position: absolute;
-  top: 300px;
-  left: 1440.5px;
+  top: 32px;
+  right: 32px;
   z-index: 10;
   display: flex;
   gap: 10px;
@@ -34,7 +34,6 @@ defineProps<{
   background: #222222;
   border-radius: 8px;
   box-shadow: 0 8px 24px rgb(0 0 0 / 18%);
-  transform: translateX(-50%);
 }
 
 .login-toast__icon {
@@ -70,6 +69,6 @@ defineProps<{
 .login-toast-enter-from,
 .login-toast-leave-to {
   opacity: 0;
-  transform: translate(-50%, -8px);
+  transform: translateY(-8px);
 }
 </style>
